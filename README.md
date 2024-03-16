@@ -1,2 +1,2 @@
 # thermalreconstruction
-mlp cbb based
+mlp cnn based method
