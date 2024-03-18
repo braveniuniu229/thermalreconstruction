@@ -85,7 +85,7 @@ class Transformer(nn.Module):
         return self.norm(x)
 
 
-class SimpleViT(nn.Module):
+class IncontextViT(nn.Module):
     def __init__(self, *, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, channels=3, dim_head=64):
         super().__init__()
         image_height, image_width = pair(image_size)
@@ -94,7 +94,7 @@ class SimpleViT(nn.Module):
         assert image_height % patch_height == 0 and image_width % patch_width == 0, 'Image dimensions must be divisible by the patch size.'
 
         patch_dim = channels * patch_height * patch_width
-
+        self.conv1 = nn.Conv2d(in_channels=2, out_channels=3, kernel_size=3, padding=1,dtype=torch.float32)
         self.to_patch_embedding = nn.Sequential(
             Rearrange("b c (h p1) (w p2) -> b (h w) (p1 p2 c)", p1=patch_height, p2=patch_width),
             nn.LayerNorm(patch_dim),
@@ -107,7 +107,9 @@ class SimpleViT(nn.Module):
             w=image_width // patch_width,
             dim=dim,
         )
-
+        #随机初始化septoken，维度是图片嵌入的维度
+        self.sep_token = nn.Parameter(torch.randn(dim))
+        self.ans_token = nn.Parameter(torch.randn(dim))
         self.transformer = Transformer(dim, depth, heads, dim_head, mlp_dim)
 
         self.pool = "mean"
@@ -115,12 +117,31 @@ class SimpleViT(nn.Module):
 
         self.linear_head = nn.Linear(dim, num_classes)
 
-    def forward(self, img):
+    def forward(self, img , examples):
+
         device = img.device
+        exp_num = examples.shape[1]
+        batch_size = img.shape[0]
+        img = self.conv1(img)
+        processed_examples = torch.zeros(batch_size,exp_num,2,3,64,64,device=device)
+        for i in range(exp_num):
+            processed_examples[:, i, 0] = self.conv1(examples[:, i, 0])
+            processed_examples[:, i, 1] = self.conv1(examples[:, i, 1])
 
         x = self.to_patch_embedding(img)
         x += self.pos_embedding.to(device, dtype=x.dtype)
-
+        sep_token = self.sep_token.unsqueeze(0).unsqueeze(1).repeat(batch_size,1 , 1).to(device)
+        ans_token = self.ans_token.unsqueeze(0).unsqueeze(1).repeat(batch_size, 1, 1).to(device)
+        prompt = [sep_token]
+        for i in range(exp_num):  # 假设examples的形状为 [batch_size, n_examples, 2, C, H, W]
+            example_input = self.to_patch_embedding(processed_examples[:, i, 0]) + self.pos_embedding.to(device, dtype=x.dtype)
+            example_output = self.to_patch_embedding(processed_examples[:, i, 1]) + self.pos_embedding.to(device, dtype=x.dtype)
+            prompt.append(example_input)
+            prompt.append(ans_token)  # 在输入和输出之间添加<SEP>Token
+            prompt.append(example_output)
+            prompt.append(sep_token)  # 在不同的示例之间添加<SEP>Token
+        prompt_tensor =torch.cat(prompt,dim=1)
+        x = torch.cat((x,prompt_tensor),dim=1)
         x = self.transformer(x)
         x = x.mean(dim=1)
 
@@ -129,9 +150,10 @@ class SimpleViT(nn.Module):
 def countPara(m:nn.Module):
     return sum(p.numel() for p in m.parameters() if m.requires_grad_())
 if __name__=="__main__":
+    device = torch.device("cuda")
+    img = torch.randn(5,2,64,64).to(device)
+    samples = torch.randn(5,2,2,2,64,64).to(device)
+    model = IncontextViT(image_size=(64, 64), patch_size=(4, 4), num_classes=4096, dim=256, depth=7, heads=8, mlp_dim=4).to(device).to(torch.float32)
+    out = model(img,samples)
+    print(countPara(model),out.shape)
 
-    img = torch.randn((1, 3, 224, 224))
-    model = SimpleViT(image_size=(224, 224), patch_size=(14, 14), num_classes=1000, dim = 768, depth = 12, heads = 12, mlp_dim = 4)
-    print(countPara(model))
-    y = model(img)
-    print(y.shape)

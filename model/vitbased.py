@@ -4,7 +4,7 @@ from vit import SimpleViT
 class vitbased(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=3, kernel_size=3, padding=1,dtype=torch.float32)
+        self.conv1 = nn.Conv2d(in_channels=2, out_channels=3, kernel_size=3, padding=1,dtype=torch.float32)
         self.vit = SimpleViT(image_size=(64, 64), patch_size=(4, 4), num_classes=4096, dim = 256, depth = 7, heads = 8, mlp_dim = 4)
 
     def forward(self, x):
