@@ -11,9 +11,7 @@ class thermalDatasetincontext(Dataset):
         :param train: Boolean flag indicating whether this is training data. Default is True.
         :param train_ratio: Ratio of data to be used for training. Default is 0.8.
         """
-        assert data.shape[:2] == labels.shape[:2], "Data and labels must have matching first two dimensions"
 
-        self.data = data
         self.labels = labels
         self.train = train
         self.num_samples = num_samples
@@ -23,7 +21,7 @@ class thermalDatasetincontext(Dataset):
         # 这里是选择的测点
         self.points = np.vstack([xv.ravel(), yv.ravel()]).T
         # Determine split sizes
-        num_samples_per_class = data.shape[1]
+        num_samples_per_class = labels.shape[1]
         num_train = int(num_samples_per_class * train_ratio)
         self.indices = np.arange(num_samples_per_class)
 
@@ -33,14 +31,14 @@ class thermalDatasetincontext(Dataset):
             self.indices = self.indices[num_train:]
 
     def __len__(self):
-        return len(self.indices) * self.data.shape[0]  # Total number of samples
+        return len(self.indices) * self.labels.shape[0]  # Total number of samples
 
     def __getitem__(self, idx):
         class_idx = idx // len(self.indices)
         sample_idx_in_class = self.indices[idx % len(self.indices)]
         sample_label = self.labels[class_idx, sample_idx_in_class]
         sample_label = sample_label.reshape(64,64)
-        sample_data = np.array([sample_label[point[0],point[1]] for point in self.points])
+        sample_data = sample_label[self.points[:,0],self.points[:,1]]
         # 把现在的idx排除
         indices_except_target = np.setdiff1d(self.indices, sample_idx_in_class)
 
