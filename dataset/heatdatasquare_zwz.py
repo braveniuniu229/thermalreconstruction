@@ -122,7 +122,8 @@ def makesquaredata(type_num,source_num,nodes,groups,n,phi,order,observation_idx,
     S = np.array(Source)
     X = np.array(points)
     file_name='Heat'+'_Types'+str(type_num)+'_source'+str(source_num)+'_number'+str(data_num_per_type)+'fixed'+'.npz'
-    np.savez(file_name, T=T,F=F,O=O,S=S,X=X)
+    file_path_save = os.path.join('data',file_name)
+    np.savez(file_path_save, T=T,F=F,O=O,S=S,X=X)
     print(f"数据集生成完成！文件名为{file_name}")
 
 
