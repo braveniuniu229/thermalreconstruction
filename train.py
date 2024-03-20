@@ -5,35 +5,48 @@ import tqdm
 from torch.utils.data import DataLoader
 import time
 import os
-from dataset import dataset_train,dataset_test
-from model.mlp import MLP
+from dataset.dataset import dataset_train,dataset_test
+from model.mlpbasic import MLP
 import csv
 import wandb
 
-layer_fixed = [16, 128, 256, 2048, 4096]
+#mlp设置
+layer_fixed = [16, 128, 512, 1024, 4096]
+
 model = MLP(layer_fixed)
 train_loader = DataLoader(dataset_train,batch_size=8000,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=800,shuffle=False)
-file = 'firsttry'
-"""这里每次都要修改成训练的model"""
-checkpoint_dir = "first"   #这里修改成训练的断点
 
-optimizer = optim.SGD(model.parameters(), 0.001, momentum=0.9)
+file = 'mlpxiugai'
+"""这里每次都要修改成训练的model"""
+checkpoint_dir = "mlpxiugai"   #这里修改成训练的断点
+
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
 criterion = nn.L1Loss()  # 假设使用均方误差损失
 
 # 记录文件和检查点路径
-if not os.path.exists(checkpoint_dir):
-    os.makedirs(checkpoint_dir)
-if not os.path.exists(f'experiresult/{file}'):
-    os.makedirs(f'experiresult/{file}')
+if not os.path.exists(f'checkpoint/{checkpoint_dir}'):
+    os.makedirs(f'checkpoint/{checkpoint_dir}')
+if not os.path.exists(f'trainingResult/{file}'):
+    os.makedirs(f'trainingResult/{file}')
 
 
+def exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.8, weight_decay_rate=0.8, lr_decay_epoch=100):
+    """Decay learning rate by a factor of lr_decay_rate every lr_decay_epoch epochs"""
+    if epoch % lr_decay_epoch:
+        return
 
+        # if args.optimizer == 'sgd':
+    for param_group in optimizer.param_groups:
+        param_group['lr'] *= lr_decay_rate
+        param_group['weight_decay'] *= weight_decay_rate
+    return
 
 def write_to_csv(file_path, epoch, loss):
     with open(file_path, mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([epoch, loss])
+
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 def save_checkpoint(epoch, iteration, model, optimizer, loss, is_best=False):
@@ -74,9 +87,13 @@ def train(epoch):
         data,labels = data.to(device).to(torch.float32),labels.to(device).to(torch.float32)
         optimizer.zero_grad()
         outputs = model(data)
+        labels = labels.view(labels.shape[0],-1)
         loss = criterion(outputs,labels)
         loss.backward()
         optimizer.step()
+        exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.9,
+                         weight_decay_rate=0.8,
+                         lr_decay_epoch=100)
         total_loss += loss.item()
 
         # if (iteration+1)%200 == 0:
@@ -104,14 +121,15 @@ def validate(epoch, best_loss):
         for iteration, (data, labels) in enumerate(test_loader):
             data, labels = data, labels
             data, labels = data.to(device).to(torch.float32), labels.to(device).to(torch.float32)
-
             outputs = model(data)
+            labels = labels.view(labels.shape[0], -1)
             loss = criterion(outputs, labels)
 
             total_loss += loss.item()
-
+            pbar.update(1)
+    pbar.close()
     avg_loss = total_loss / len(test_loader)
-    write_to_csv(f'experiresult/{file}/val_log.csv', epoch, avg_loss)
+    write_to_csv(f'trainresult/{file}/val_log.csv', epoch, avg_loss)
     # wandb.log({"average_loss_val": avg_loss})
     # 如果是最好的损失，保存为 best checkpoint
     if avg_loss < best_loss:
@@ -122,7 +140,7 @@ def validate(epoch, best_loss):
     return best_loss
 
 best_loss = float('inf')
-num_epochs = 20000 # 假设训练 30 个 epochs
+num_epochs = 5000 # 假设训练 30 个 epochs
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
@@ -134,5 +152,4 @@ if __name__ == "__main__":
     start_epoch, best_loss = load_checkpoint(checkpoint_path, model, optimizer)
     for epoch in tqdm.trange(start_epoch, num_epochs):
         train(epoch)
-
         best_loss = validate(epoch, best_loss)

@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 
 
 class thermalDataset(Dataset):
-    def __init__(self, data, labels, train=True, train_ratio=0.8):
+    def __init__(self, labels, train=True, train_ratio=0.8):
         """
         Custom dataset initializer.
         :param data: The data (e.g., 'T' from your dataset)
@@ -13,10 +13,14 @@ class thermalDataset(Dataset):
         """
         assert data.shape[:2] == labels.shape[:2], "Data and labels must have matching first two dimensions"
 
-        self.data = data
+
         self.labels = labels
         self.train = train
-
+        x = np.linspace(8, 55, 4, dtype=int)
+        y = np.linspace(8, 55, 4, dtype=int)
+        xv, yv = np.meshgrid(x, y)
+        #这里是选择的测点
+        self.points = np.vstack([xv.ravel(), yv.ravel()]).T
         # Determine split sizes
         num_samples_per_class = data.shape[1]
         num_train = int(num_samples_per_class * train_ratio)
@@ -33,15 +37,15 @@ class thermalDataset(Dataset):
     def __getitem__(self, idx):
         class_idx = idx // len(self.indices)
         sample_idx_in_class = self.indices[idx % len(self.indices)]
-        sample_data = self.data[class_idx, sample_idx_in_class]
         sample_label = self.labels[class_idx, sample_idx_in_class]
+        sample_label = sample_label.reshape(64,64)
+        sample_data = np.array([sample_label[point[0],point[1]] for point in self.points])
         return sample_data, sample_label
 dataorigin = np.load('/mnt/d/codespace/DATASETRBF/Heat_Types100_source4_number1000_normalized.npz')
-data = dataorigin['O']
 labels = dataorigin['T']
 
-dataset_train = thermalDataset(data, labels, train=True, train_ratio=0.8)
-dataset_test = thermalDataset(data, labels, train=False, train_ratio=0.8)
+dataset_train = thermalDataset(labels, train=True, train_ratio=0.8)
+dataset_test = thermalDataset(labels, train=False, train_ratio=0.8)
 
 if __name__ =="__main__":
     trainloader = DataLoader(dataset_train,shuffle=True,batch_size=800)
