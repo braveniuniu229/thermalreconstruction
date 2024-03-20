@@ -9,6 +9,7 @@ xv, yv = np.meshgrid(x, y)
 points = np.vstack([xv.ravel(), yv.ravel()]).T
 values = T[points[:,0],points[:,1]]
 grid_x, grid_y = np.meshgrid(np.linspace(0, 63, 64), np.linspace(0, 63, 64))
+print(values.shape)
 print(points)
 voronoidata = griddata(points, values, (grid_x, grid_y), method='nearest')
 print(voronoidata)
