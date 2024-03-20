@@ -84,7 +84,7 @@ class MLP(nn.Module):
             linear_layers.append(nn.Linear(layers[i], layers[i + 1]))
             linear_layers.append(nn.Dropout(0.1))
             # linear_layers.append(nn.LayerNorm(layers[i + 1]))
-            linear_layers.append(nn.Dropout(0.1))
+
             linear_layers.append(nn.GELU())
 
         linear_layers.append(nn.Linear(layers[-2], layers[-1]))
