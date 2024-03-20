@@ -80,9 +80,13 @@ class MLP(nn.Module):
         super(MLP, self).__init__()
         linear_layers = []
         for i in range(len(layers) - 2):
+
             linear_layers.append(nn.Linear(layers[i], layers[i + 1]))
+            linear_layers.append(nn.Dropout(0.1))
             # linear_layers.append(nn.LayerNorm(layers[i + 1]))
+            linear_layers.append(nn.Dropout(0.1))
             linear_layers.append(nn.GELU())
+
         linear_layers.append(nn.Linear(layers[-2], layers[-1]))
         self.layers = nn.Sequential(*linear_layers)
         self._initialize_weights()
@@ -95,6 +99,18 @@ class MLP(nn.Module):
                     nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+
+    def dropout_layer(X, dropout):
+        assert 0 <= dropout <= 1
+        # 在本情况中，所有元素都被丢弃
+        if dropout == 1:
+            return torch.zeros_like(X)
+        # 在本情况中，所有元素都被保留
+        if dropout == 0:
+            return X
+        mask = (torch.rand(X.shape) > dropout).float()
+        return mask * X / (1.0 - dropout)
+
 
     def forward(self, x):
         x = self.layers(x)
