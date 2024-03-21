@@ -65,9 +65,9 @@ def makesquaredata(type_num,source_num,nodes,groups,n,phi,order,observation_idx,
         print("Types{}".format(i))
         # print("a", a)
         # print("b", b)
-        f_list =[]
+        # f_list =[]
         data_list=[]
-        obs = []
+        # obs = []
         source = []
 
         for j in range(data_num_per_type):
@@ -96,11 +96,11 @@ def makesquaredata(type_num,source_num,nodes,groups,n,phi,order,observation_idx,
                 order=order)
             #生成温度场的解
             u_itp = I.dot(u_soln)
-            observation = u_itp[observation_idx]
-            F1 = PDE(source_num,a,b,c,points[:,0], points[:,1])
-            f_list.append(F1.tolist())
+              # observation = u_itp[observation_idx]
+            # F1 = PDE(source_num,a,b,c,points[:,0], points[:,1])
+            # f_list.append(F1.tolist())
             data_list.append(u_itp.tolist())
-            obs.append(observation.tolist())
+              # obs.append(observation.tolist())
             # ug = u_itp.reshape((64, 64))  # fold back into a grid
             #
             # F11 = F1.reshape((64, 64))
@@ -111,19 +111,19 @@ def makesquaredata(type_num,source_num,nodes,groups,n,phi,order,observation_idx,
 
         print(f"type{i+1} have already finished!")
         Data_list.append(data_list)
-        F_list.append(f_list)
-        Obs.append(obs)
+        # F_list.append(f_list)
+        # Obs.append(obs)
         Source.append(source)
     print(f"{source_num}个类型的数据全部生成完成")
     print("现在开始写入数据集。。。。。。。。")
     T = np.array(Data_list)
-    F = np.array(F_list)
-    O =np.array(Obs)
+    # F = np.array(F_list)
+    # O =np.array(Obs)
     S = np.array(Source)
-    X = np.array(points)
+    # X = np.array(points)
     file_name='Heat'+'_Types'+str(type_num)+'_source'+str(source_num)+'_number'+str(data_num_per_type)+'fixed'+'.npz'
     file_path_save = os.path.join('data',file_name)
-    np.savez(file_path_save, T=T,F=F,O=O,S=S,X=X)
+    np.savez(file_path_save, T=T,S=S)
     print(f"数据集生成完成！文件名为{file_name}")
 
 
