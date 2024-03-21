@@ -108,7 +108,7 @@ def train(epoch):
     pbar.close()
     average_loss = total_loss / len(train_loader)  # 计算平均损失
     epoch_time = time.time() - start_time
-    write_to_csv(f'experiresult/{file}/train_log.csv', epoch, average_loss)
+    write_to_csv(f'trainResult/{file}/train_log.csv', epoch, average_loss)
     # wandb.log({"average_loss_train":average_loss,'epoch_usedtime':epoch_time })
     # githubllllkk
     """这里要修改模型的路径"""
@@ -129,7 +129,7 @@ def validate(epoch, best_loss):
             pbar.update(1)
     pbar.close()
     avg_loss = total_loss / len(test_loader)
-    write_to_csv(f'trainresult/{file}/val_log.csv', epoch, avg_loss)
+    write_to_csv(f'trainResult/{file}/val_log.csv', epoch, avg_loss)
     # wandb.log({"average_loss_val": avg_loss})
     # 如果是最好的损失，保存为 best checkpoint
     if avg_loss < best_loss:
