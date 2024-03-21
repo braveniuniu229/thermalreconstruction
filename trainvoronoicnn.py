@@ -5,23 +5,24 @@ import tqdm
 from torch.utils.data import DataLoader
 import time
 import os
-from dataset.dataset import dataset_train,dataset_test
-from model.shallowdecodermlp import shallow_decoder
+from dataset.vordataset import dataset_train,dataset_test
+from model.voronoiCNNoriginal import VoronoiCNN
 import csv
 import wandb
 
 
 
-model = shallow_decoder(outputlayer_size=4096,n_sensors=16)
-train_loader = DataLoader(dataset_train,batch_size=8000,shuffle=True)
-test_loader = DataLoader(dataset_test,batch_size=2000,shuffle=False)
+model = VoronoiCNN()
+train_loader = DataLoader(dataset_train,batch_size=800,shuffle=True)
+test_loader = DataLoader(dataset_test,batch_size=200,shuffle=False)
 
-file = 'shallowdecoder'
+file = 'voronoiCNN'
 """这里每次都要修改成训练的model"""
-checkpoint_dir = "shallowdecoder"   #这里修改成训练的断点
+checkpoint_dir = "voronoiCNN"   #这里修改成训练的断点
 
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
-criterion = nn.L1Loss()  # 假设使用均方误差损失
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+criterion = nn.L1Loss()
+  # 假设使用均方误差损失
 
 # 记录文件和检查点路径
 if not os.path.exists(f'checkpoint/{checkpoint_dir}'):
@@ -31,16 +32,7 @@ if not os.path.exists(f'trainingResult/{file}'):
     os.makedirs(f'trainingResult/{file}')
 
 
-def exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.8, weight_decay_rate=0.8, lr_decay_epoch=100):
-    """Decay learning rate by a factor of lr_decay_rate every lr_decay_epoch epochs"""
-    if epoch % lr_decay_epoch:
-        return
 
-        # if args.optimizer == 'sgd':
-    for param_group in optimizer.param_groups:
-        param_group['lr'] *= lr_decay_rate
-        param_group['weight_decay'] *= weight_decay_rate
-    return
 
 def write_to_csv(file_path, epoch, loss):
     with open(file_path, mode='a', newline='') as file:
@@ -87,13 +79,11 @@ def train(epoch):
         data,labels = data.to(device).to(torch.float32),labels.to(device).to(torch.float32)
         optimizer.zero_grad()
         outputs = model(data)
-        labels = labels.view(labels.shape[0],-1)
+        outputs = outputs.squeeze(1)
         loss = criterion(outputs,labels)
         loss.backward()
         optimizer.step()
-        exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.9,
-                         weight_decay_rate=0.8,
-                         lr_decay_epoch=100)
+
         total_loss += loss.item()
 
         # if (iteration+1)%200 == 0:
@@ -122,7 +112,7 @@ def validate(epoch, best_loss):
             data, labels = data, labels
             data, labels = data.to(device).to(torch.float32), labels.to(device).to(torch.float32)
             outputs = model(data)
-            labels = labels.view(labels.shape[0], -1)
+            outputs = outputs.squeeze(1)
             loss = criterion(outputs, labels)
 
             total_loss += loss.item()

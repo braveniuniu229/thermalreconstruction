@@ -22,7 +22,7 @@ class thermalDataset(Dataset):
         #这里是选择的测点
         self.points = np.vstack([xv.ravel(), yv.ravel()]).T
         # Determine split sizes
-        num_samples_per_class = data.shape[1]
+        num_samples_per_class = labels.shape[1]
         num_train = int(num_samples_per_class * train_ratio)
         self.indices = np.arange(num_samples_per_class)
 
