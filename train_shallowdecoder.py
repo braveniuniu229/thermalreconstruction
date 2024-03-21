@@ -6,20 +6,19 @@ from torch.utils.data import DataLoader
 import time
 import os
 from dataset.dataset import dataset_train,dataset_test
-from model.mlpbasic import MLP
+from model.shallowdecodermlp import shallow_decoder
 import csv
 import wandb
 
-#mlp设置
-layer_fixed = [16, 128, 512, 1024, 4096]
 
-model = MLP(layer_fixed)
+
+model = shallow_decoder(outputlayer_size=4096,n_sensors=16)
 train_loader = DataLoader(dataset_train,batch_size=8000,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=800,shuffle=False)
 
-file = 'mlpxiugai'
+file = 'shallowdecoder'
 """这里每次都要修改成训练的model"""
-checkpoint_dir = "mlpxiugai"   #这里修改成训练的断点
+checkpoint_dir = "shallowdecoder"   #这里修改成训练的断点
 
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
 criterion = nn.L1Loss()  # 假设使用均方误差损失
@@ -141,7 +140,7 @@ def validate(epoch, best_loss):
     return best_loss
 
 best_loss = float('inf')
-num_epochs = 5000 # 假设训练 30 个 epochs
+num_epochs = 500 # 假设训练 30 个 epochs
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)

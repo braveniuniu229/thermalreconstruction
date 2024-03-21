@@ -7,10 +7,10 @@ class MLP(nn.Module):
         for i in range(len(layers) - 2):
 
             linear_layers.append(nn.Linear(layers[i], layers[i + 1]))
-            linear_layers.append(nn.Dropout(0.1))
+            # linear_layers.append(nn.Dropout(0.1))
             # linear_layers.append(nn.LayerNorm(layers[i + 1]))
-            linear_layers.append(nn.Dropout(0.1))
-            linear_layers.append(nn.GELU())
+
+            linear_layers.append(nn.Tanh())
 
         linear_layers.append(nn.Linear(layers[-2], layers[-1]))
         self.layers = nn.Sequential(*linear_layers)

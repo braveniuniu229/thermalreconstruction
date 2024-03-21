@@ -11,7 +11,7 @@ class thermalDataset(Dataset):
         :param train: Boolean flag indicating whether this is training data. Default is True.
         :param train_ratio: Ratio of data to be used for training. Default is 0.8.
         """
-        assert data.shape[:2] == labels.shape[:2], "Data and labels must have matching first two dimensions"
+
 
 
         self.labels = labels
@@ -32,14 +32,14 @@ class thermalDataset(Dataset):
             self.indices = self.indices[num_train:]
 
     def __len__(self):
-        return len(self.indices) * self.data.shape[0]  # Total number of samples
+        return len(self.indices) * self.labels.shape[0]  # Total number of samples
 
     def __getitem__(self, idx):
         class_idx = idx // len(self.indices)
         sample_idx_in_class = self.indices[idx % len(self.indices)]
         sample_label = self.labels[class_idx, sample_idx_in_class]
         sample_label = sample_label.reshape(64,64)
-        sample_data = np.array([sample_label[point[0],point[1]] for point in self.points])
+        sample_data = sample_label[self.points[:,0],self.points[:,1]]
         return sample_data, sample_label
 dataorigin = np.load('/mnt/d/codespace/DATASETRBF/Heat_Types100_source4_number1000_normalized.npz')
 labels = dataorigin['T']
