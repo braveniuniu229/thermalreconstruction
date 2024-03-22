@@ -1,6 +1,5 @@
 
 import numpy as np
-'/mnt/d/codespace/DATASETRBF/Heat_Types100_source4_number1000_normalized.npz'
 
 
 def normalized():
