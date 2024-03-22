@@ -114,7 +114,7 @@ def makesquaredata(type_num,source_num,nodes,groups,n,phi,order,observation_idx,
         # F_list.append(f_list)
         # Obs.append(obs)
         Source.append(source)
-    print(f"{source_num}个类型的数据全部生成完成")
+    print(f"{type_num}个类型的数据全部生成完成")
     print("现在开始写入数据集。。。。。。。。")
     T = np.array(Data_list)
     # F = np.array(F_list)
