@@ -8,35 +8,29 @@ class shallow_decoder(nn.Module):
         self.outputlayer_size = outputlayer_size
 
         self.learn_features = nn.Sequential(
-<<<<<<< HEAD
+
             nn.Linear(n_sensors, 150),
             nn.ReLU(True),
             nn.BatchNorm1d(150),
         )
 
         self.learn_coef = nn.Sequential(
-            nn.Linear(150, 180),
+            nn.Linear(150, 300),
             nn.ReLU(True),
-            nn.BatchNorm1d(180),
+            nn.BatchNorm1d(300),
+        )
+
+        self.learn_coef2 = nn.Sequential(
+            nn.Linear(300, 800),
+            nn.ReLU(True),
+            nn.BatchNorm1d(800),
         )
 
         self.learn_dictionary = nn.Sequential(
-            nn.Linear(180, self.outputlayer_size),
-=======
-            nn.Linear(n_sensors, 40),
-            nn.ReLU(True),
-            nn.BatchNorm1d(40),
-        )
 
-        self.learn_coef = nn.Sequential(
-            nn.Linear(40, 45),
-            nn.ReLU(True),
-            nn.BatchNorm1d(45),
-        )
+            nn.Linear(800, self.outputlayer_size),
 
-        self.learn_dictionary = nn.Sequential(
-            nn.Linear(45, self.outputlayer_size),
->>>>>>> c4a1b7adead5c0323ce7c1451ef75203885b5e3d
+
         )
 
         for m in self.modules():
@@ -55,6 +49,7 @@ class shallow_decoder(nn.Module):
     def forward(self, x):
         x = self.learn_features(x)
         x = self.learn_coef(x)
+        x = self.learn_coef2(x)
         x = self.learn_dictionary(x)
         return x
 if __name__ == "__main__":

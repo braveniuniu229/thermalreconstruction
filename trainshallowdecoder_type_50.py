@@ -1,24 +1,20 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import tqdm
 from torch.utils.data import DataLoader
 import time
 import os
-from dataset.dataset import dataset_train,dataset_test
+from dataset.shallowdecoder.dataset_type_50 import dataset_train,dataset_test
 from model.shallowdecodermlp import shallow_decoder
 import csv
-import wandb
-
-
 
 model = shallow_decoder(outputlayer_size=4096,n_sensors=16)
 train_loader = DataLoader(dataset_train,batch_size=8000,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=2000,shuffle=False)
 
-file = 'shallowdecoder'
+file = 'shallowdecoder_type_50'
 """这里每次都要修改成训练的model"""
-checkpoint_dir = "shallowdecoder"   #这里修改成训练的断点
+checkpoint_dir = "shallowdecoder_type_50"   #这里修改成训练的断点
 
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
 criterion = nn.L1Loss()  # 假设使用均方误差损失
@@ -26,12 +22,12 @@ criterion = nn.L1Loss()  # 假设使用均方误差损失
 # 记录文件和检查点路径
 if not os.path.exists(f'checkpoint/{checkpoint_dir}'):
     os.makedirs(f'checkpoint/{checkpoint_dir}')
-checkpoint_save_path = os.path.join('checkpoint',checkpoint_dir)
+checkpoint_save_path = os.path.join('../checkpoint', checkpoint_dir)
 if not os.path.exists(f'trainingResult/{file}'):
     os.makedirs(f'trainingResult/{file}')
 
 
-def exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.8, weight_decay_rate=0.8, lr_decay_epoch=100):
+def exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.8, weight_decay_rate=0.8, lr_decay_epoch=200):
     """Decay learning rate by a factor of lr_decay_rate every lr_decay_epoch epochs"""
     if epoch % lr_decay_epoch:
         return
