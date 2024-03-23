@@ -1,9 +1,10 @@
 
 import numpy as np
+import argparse
 
 
 def normalized():
-    path = '/mnt/d/codespace/thermaldata/Heat_Types10_source4_number10000fixed.npz'
+    path = '../data/Heat_Types200_source4_number500fixed.npz'
     data = np.load(path)  # 使用self.path来访问实例变量
     origindata = data['T']
     mean = np.mean(origindata.reshape(-1))
@@ -11,6 +12,6 @@ def normalized():
     normalized_data = (origindata - mean) / std_var
     mid_path = path.rsplit('.npz', 1)[0]  # 移除.npz
     new_path = mid_path + "_normalized.npz"
-    np.savez(new_path, T=normalized_data)
+    np.savez(new_path, T=normalized_data,m=mean,v=std_var)
 if __name__ == '__main__':
     normalized()

@@ -41,7 +41,7 @@ class thermalDataset(Dataset):
         sample_label = sample_label.reshape(64,64)
         sample_data = sample_label[self.points[:,0],self.points[:,1]]
         return sample_data, sample_label
-dataorigin = np.load('/mnt/d/codespace/DATASETRBF/Heat_Types1000_source4_number100_normalized.npz')
+dataorigin = np.load('/mnt/d/codespace/DATASETRBF/Heat_Types10_source4_number10000_normalized.npz')
 labels = dataorigin['T']
 
 dataset_train = thermalDataset(labels, train=True, train_ratio=0.8)
