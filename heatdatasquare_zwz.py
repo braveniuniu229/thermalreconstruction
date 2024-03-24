@@ -74,22 +74,22 @@ def makesquaredata(type_num,source_num,nodes,groups,n,phi,order,observation_idx,
         for j in range(data_num_per_type):
             # 设置c为传导率
             c = np.random.uniform(1000, 6000, source_num)
-            c_ood = np.random.uniform(10000, 60000, source_num)
+            # c_ood = np.random.uniform(10000, 60000, source_num)
             source.append([a,b,c])
             yr = PDE(source_num,a,b,c,nodes[:,0], nodes[:,1])
-            yr_ood = PDE(source_num,a,b,c_ood,nodes[:,0], nodes[:,1])
+            # yr_ood = PDE(source_num,a,b,c_ood,nodes[:,0], nodes[:,1])
             # create "right hand side" vector
             d = np.zeros((N,))
-            d_ood = np.zeros((N,))
+            # d_ood = np.zeros((N,))
             d[groups['interior']] = yr[groups['interior']]
             d[groups['boundary:all']] = 30
 
-            d_ood[groups['interior']] = yr_ood[groups['interior']]
-            d_ood[groups['boundary:all']] = 30
-            # 这里是生成原始分辨率的温度场
+            # d_ood[groups['interior']] = yr_ood[groups['interior']]
+            # d_ood[groups['boundary:all']] = 30
+            # # 这里是生成原始分辨率的温度场
             u_soln = spsolve(A, d)
 
-            u_soln_ood = spsolve(A,d_ood)
+            # u_soln_ood = spsolve(A,d_ood)
             # Create a grid for interpolating the solution
             xg, yg = np.meshgrid(np.linspace(0, 2.0, 64), np.linspace(0, 2.0, 64))
             points = np.array([xg.flatten(), yg.flatten()]).T  #(4096,2)   #最终的分辨率
@@ -106,21 +106,21 @@ def makesquaredata(type_num,source_num,nodes,groups,n,phi,order,observation_idx,
             #生成温度场的解
             u_itp = I.dot(u_soln)
 
-            I_ood =weight_matrix(
-                x=points,
-                p=nodes,
-                n=n,
-                diffs=[0, 0],
-                phi=phi,
-                order=order
-
-            )
-            u_itp_ood = I_ood.dot(u_soln_ood)
+            # I_ood =weight_matrix(
+            #     x=points,
+            #     p=nodes,
+            #     n=n,
+            #     diffs=[0, 0],
+            #     phi=phi,
+            #     order=order
+            #
+            # )
+            # u_itp_ood = I_ood.dot(u_soln_ood)
               # observation = u_itp[observation_idx]
             # F1 = PDE(source_num,a,b,c,points[:,0], points[:,1])
             # f_list.append(F1.tolist())
             data_list.append(u_itp.tolist())
-            data_list_ood.append(u_itp_ood.tolist())
+            # data_list_ood.append(u_itp_ood.tolist())
               # obs.append(observation.tolist())
             # ug = u_itp.reshape((64, 64))  # fold back into a grid
             #
@@ -132,21 +132,21 @@ def makesquaredata(type_num,source_num,nodes,groups,n,phi,order,observation_idx,
 
         print(f"type{i+1} have already finished!")
         Data_list.append(data_list)
-        Data_list_ood.append(data_list_ood)
+        # Data_list_ood.append(data_list_ood)
         # F_list.append(f_list)
         # Obs.append(obs)
         Source.append(source)
     print(f"{type_num}个类型的数据全部生成完成")
     print("现在开始写入数据集。。。。。。。。")
     T = np.array(Data_list)
-    T_ood =np.array(Data_list_ood)
+    # T_ood =np.array(Data_list_ood)
     # F = np.array(F_list)
     # O =np.array(Obs)
     S = np.array(Source)
     # X = np.array(points)
     file_name='Heat'+'_Types'+str(type_num)+'_source'+str(source_num)+'_number'+str(data_num_per_type)+'fixed'+'.npz'
     file_path_save = os.path.join('data',file_name)
-    np.savez(file_path_save, T=T,S=S,T_ood=T_ood)
+    np.savez(file_path_save, T=T,S=S)
     print(f"数据集生成完成！文件名为{file_name}")
 
 

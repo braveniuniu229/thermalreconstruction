@@ -9,3 +9,5 @@
 data/
 checkpoint/
 trainingResult/
+result/
+plot3ddistribution/

@@ -6,7 +6,7 @@ def plot3ddistribution(exp:str,type_num:int,data_num_per_type:int,data):
     #exp表达为数据集的格式
     # 假设我们有4个类别，每个类别有5个样本，每个样本有3个三维点
     # 这里生成一些随机数据来模拟你的数据结构
-    save_path = os.path.join('plot3ddistribution',exp)
+    save_path = os.path.join('plot3ddistribution',exp[:-4])
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     t = type_num  # 类别数量
@@ -31,9 +31,10 @@ def plot3ddistribution(exp:str,type_num:int,data_num_per_type:int,data):
             ax.scatter(xs, ys, zs, color=colors[i])
 
     # 设置坐标轴标签
-    ax.set_xlabel('X Label')
-    ax.set_ylabel('Y Label')
-    ax.set_zlabel('Z Label')
+    ax.set_xlabel('a')
+    ax.set_ylabel('b')
+    ax.set_zlabel('c')
 
     # 显示图表
+    plt.savefig(os.path.join(save_path,"type_num_{}_data_num_{}".format(type_num,data_num_per_type)))
     plt.show()
