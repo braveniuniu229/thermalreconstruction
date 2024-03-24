@@ -57,7 +57,7 @@ def load_checkpoint(checkpoint_path, model, optimizer):
     """加载 checkpoint."""
     if os.path.isfile(checkpoint_path):
         print(f"Loading checkpoint '{checkpoint_path}'")
-        checkpoint = torch.load(checkpoint_save_path)
+        checkpoint = torch.load(checkpoint_path)
         start_epoch = checkpoint['epoch'] + 1  # 假设我们保存的 epoch 是已完成的，所以从下一个开始
         best_loss = checkpoint['loss']
         model.load_state_dict(checkpoint['model_state_dict'])
@@ -140,7 +140,7 @@ model.to(device)
 if __name__ == "__main__":
     print(f'The model has {count_parameters(model):,} trainable parameters')
     print(device)
-    checkpoint_path = f"{checkpoint_dir}/checkpoint_best.pth"
+    checkpoint_path = f"{checkpoint_save_path}/checkpoint_best.pth"
     start_epoch, best_loss = load_checkpoint(checkpoint_path, model, optimizer)
     for epoch in tqdm.trange(start_epoch, num_epochs):
         train(epoch)
