@@ -15,20 +15,20 @@ class shallow_decoder(nn.Module):
         )
 
         self.learn_coef = nn.Sequential(
-            nn.Linear(150, 300),
+            nn.Linear(150, 1500),
             nn.ReLU(True),
-            nn.BatchNorm1d(300),
+            nn.BatchNorm1d(1500),
         )
 
         self.learn_coef2 = nn.Sequential(
-            nn.Linear(300, 800),
+            nn.Linear(1500, 2000),
             nn.ReLU(True),
-            nn.BatchNorm1d(800),
+            nn.BatchNorm1d(2000),
         )
 
         self.learn_dictionary = nn.Sequential(
 
-            nn.Linear(800, self.outputlayer_size),
+            nn.Linear(2000, self.outputlayer_size),
 
 
         )
