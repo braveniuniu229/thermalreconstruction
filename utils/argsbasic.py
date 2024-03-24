@@ -6,8 +6,10 @@ def parses():
     parser = configargparse.ArgumentParser(description='field_reconstruction')
     # training settings
     parser.add_argument('--lr', type=float, default=0.001)
-    parser.add_argument('--epochs', type=int, default=3000)
-    parser.add_argument('--batch_size', type=int, default=8000)
+    parser.add_argument('--epochs', type=int, default=4000)
+    parser.add_argument('--batch_size_train', type=int, default=8000)
+    parser.add_argument('--batch_size_test', type=int, default=8000)
+
 
     # logging and models save settings
     parser.add_argument('--plot_freq', type=int, default=50)
