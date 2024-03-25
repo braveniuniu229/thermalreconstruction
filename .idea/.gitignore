@@ -11,3 +11,4 @@ checkpoint/
 trainingResult/
 result/
 plot3ddistribution/
+wandb/
