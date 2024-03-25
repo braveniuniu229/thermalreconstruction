@@ -5,12 +5,12 @@ from torch.utils.data import DataLoader
 import time
 import os
 from dataset.shallowdecoder.dataset_type_1 import dataset_train,dataset_test
-from model.shallowdecoder2 import shallow_decoder
+from model.shallowdecoderBaseline import shallow_decoder
 import csv
 import wandb
 import utils.argsbasic
 wandb.init(
-    project='shallow_decoder_type_1',
+    project='shallow_decoder',
     config={
         'lr':0.001,
         'arch':'shallowdecoder2',

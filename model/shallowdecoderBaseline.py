@@ -1,8 +1,8 @@
 import torch.nn as nn
 import torch
-class shallow_decoder(nn.Module):
+class Shallow_decoder(nn.Module):
     def __init__(self, outputlayer_size, n_sensors):
-        super(shallow_decoder, self).__init__()
+        super(Shallow_decoder, self).__init__()
 
         self.n_sensors = n_sensors
         self.outputlayer_size = outputlayer_size
@@ -14,14 +14,14 @@ class shallow_decoder(nn.Module):
         )
 
         self.learn_coef = nn.Sequential(
-            nn.Linear(60, 65),
+            nn.Linear(60, 70),
             nn.ReLU(True),
-            nn.BatchNorm1d(65),
+            nn.BatchNorm1d(70),
         )
 
 
         self.learn_dictionary = nn.Sequential(
-            nn.Linear(65, self.outputlayer_size),
+            nn.Linear(70, self.outputlayer_size),
         )
 
         for m in self.modules():
@@ -39,6 +39,7 @@ class shallow_decoder(nn.Module):
 
     def forward(self, x):
         x = self.learn_features(x)
+        x = nn.functional.dropout(x, p=0.1, training=self.training)
         x = self.learn_coef(x)
         x = self.learn_dictionary(x)
         return x

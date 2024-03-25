@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import time
 import os
 from dataset.dataset import dataset_train,dataset_test
-from model.shallowdecoder2 import shallow_decoder
+from model.shallowdecoderBaseline import shallow_decoder
 import csv
 import wandb
 

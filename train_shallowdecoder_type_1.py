@@ -10,12 +10,17 @@ import csv
 import wandb
 import utils.argsbasic
 wandb.init(
-    project='shallow_decoder_type_1',
+    project='shallow_decoder',
     config={
         'lr':0.01,
-        'arch':'shallowdecoder1',
-        'dataset':'type1',
-        'epochs':3000
+        'arch':'shallowdecoderBaseline',
+        'config':[16,60,70,4096],
+        'weightdecay':1e-4,
+        'dataset':'typeNum_1',
+        'epochs':3000,
+        'tag':'baseline',
+        'lr_decay_epoch':300,
+        'batch_size':8000
     }
 )
 model = shallow_decoder(n_sensors=16,outputlayer_size=4096)
@@ -128,7 +133,6 @@ def validate(epoch, best_loss):
             outputs = model(data)
             labels = labels.view(labels.shape[0], -1)
             loss = criterion(outputs, labels)
-
             total_loss += loss.item()
             pbar.update(1)
     pbar.close()
@@ -139,7 +143,6 @@ def validate(epoch, best_loss):
     if avg_loss < best_loss:
         best_loss = avg_loss
         save_checkpoint(epoch, 'best', model, optimizer, avg_loss, is_best=True)
-
         print("产生了新的最优结果，模型已经保存!")
     return best_loss
 
