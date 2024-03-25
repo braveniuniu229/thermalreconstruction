@@ -5,15 +5,15 @@ from torch.utils.data import DataLoader
 import time
 import os
 from dataset.shallowdecoder.dataset_type_1 import dataset_train,dataset_test
-from model.shallowdecodermlp import shallow_decoder
+from model.shallowdecoder2 import shallow_decoder
 import csv
 import wandb
 import utils.argsbasic
 wandb.init(
     project='shallow_decoder_type_1',
     config={
-        'lr':0.01,
-        'arch':'shallowdecoder1',
+        'lr':0.001,
+        'arch':'shallowdecoder2',
         'dataset':'type1',
         'epochs':3000
     }
@@ -39,7 +39,7 @@ if not os.path.exists(f'trainingResult/{file}'):
     os.makedirs(f'trainingResult/{file}')
 
 
-def exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.9, weight_decay_rate=0.8, lr_decay_epoch=300):
+def exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.9, weight_decay_rate=0.8, lr_decay_epoch=500):
     """Decay learning rate by a factor of lr_decay_rate every lr_decay_epoch epochs."""
     if epoch % lr_decay_epoch == 0:  # 当epoch是lr_decay_epoch的倍数时执行
         for param_group in optimizer.param_groups:
