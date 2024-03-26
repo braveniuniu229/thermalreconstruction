@@ -4,28 +4,28 @@ import tqdm
 from torch.utils.data import DataLoader
 import time
 import os
-from dataset.shallowdecoder.dataset_type_50 import dataset_train,dataset_test
-from model.shallowdecodermlp import shallow_decoder
+from dataset.shallowdecoder.dataset_type_1 import dataset_train,dataset_test
+from model.shallowdecoderBaseline import Shallow_decoder
 import csv
 import wandb
 import utils.argsbasic
 wandb.init(
     project='shallow_decoder',
     config={
-        'lr':0.01,
-        'arch':'shallowdecoderBaseline_shallowdecodermlp',
-        'config':[16,60,65,300,4096],
+        'lr':0.001,
+        'arch':'shallowdecoderBaseline',
+        'config':[16,55,65,4096],
         'weightdecay':1e-4,
-        'dataset':'typeNum_50',
+        'dataset':'typeNum_1',
         'epochs':1000,
         'tag':'baseline',
         'lr_decay_epoch':100,
         'batch_size':8000,
         'dropout':False,
-        'num':5
+        'num':3
     }
 )
-model = shallow_decoder(n_sensors=16,outputlayer_size=4096)
+model = Shallow_decoder(n_sensors=16,outputlayer_size=4096)
 train_loader = DataLoader(dataset_train,batch_size=8000,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=10000,shuffle=False)
 args = wandb.config
@@ -34,7 +34,7 @@ file = args.arch +'_'+args.dataset+str(args.num)
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
 
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-2,weight_decay=1e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3,weight_decay=1e-4)
 
 criterion = nn.L1Loss()  # 假设使用均方误差损失
 
@@ -102,9 +102,7 @@ def train(epoch):
         loss = criterion(outputs,labels)
         loss.backward()
         optimizer.step()
-        exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.9,
-                         weight_decay_rate=0.8,
-                         lr_decay_epoch=100)
+
 
         total_loss += loss.item()
 
@@ -114,7 +112,9 @@ def train(epoch):
         #     """xiugai"""
         pbar.set_description(f"Training Epoch {epoch} [{iteration}/{len(train_loader)}]")
         pbar.update(1)# 更新进度条
-
+    exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.9,
+                     weight_decay_rate=0.8,
+                     lr_decay_epoch=100)
     pbar.close()
     average_loss = total_loss / len(train_loader)  # 计算平均损失
     epoch_time = time.time() - start_time

@@ -10,24 +10,31 @@ import csv
 import wandb
 import utils.argsbasic
 wandb.init(
-    project='shallow_decoder_type_100',
+    project='shallow_decoder',
     config={
-        'lr':0.001,
-        'arch':'shallowdecoder',
-        'dataset':'type100',
-        'epochs':5000
+        'lr':0.01,
+        'arch':'shallowdecoderBaseline_shallowdecodermlp',
+        'config':[16,60,65,300,4096],
+        'weightdecay':1e-4,
+        'dataset':'typeNum_100',
+        'epochs':1000,
+        'tag':'baseline',
+        'lr_decay_epoch':100,
+        'batch_size':8000,
+        'dropout':False,
+        'num':5
     }
 )
 model = shallow_decoder(n_sensors=16,outputlayer_size=4096)
-train_loader = DataLoader(dataset_train,batch_size=16000,shuffle=True)
+train_loader = DataLoader(dataset_train,batch_size=8000,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=10000,shuffle=False)
 args = wandb.config
 
-file = args.arch +'_'+args.dataset
+file = args.arch +'_'+args.dataset+str(args.num)
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
 
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3,weight_decay=1e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-2,weight_decay=1e-4)
 
 criterion = nn.L1Loss()  # 假设使用均方误差损失
 
@@ -39,7 +46,7 @@ if not os.path.exists(f'trainingResult/{file}'):
     os.makedirs(f'trainingResult/{file}')
 
 
-def exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.8, weight_decay_rate=0.8, lr_decay_epoch=300):
+def exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.9, weight_decay_rate=0.8, lr_decay_epoch=300):
     """Decay learning rate by a factor of lr_decay_rate every lr_decay_epoch epochs."""
     if epoch % lr_decay_epoch == 0:  # 当epoch是lr_decay_epoch的倍数时执行
         for param_group in optimizer.param_groups:
@@ -95,7 +102,9 @@ def train(epoch):
         loss = criterion(outputs,labels)
         loss.backward()
         optimizer.step()
-
+        exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.9,
+                         weight_decay_rate=0.8,
+                         lr_decay_epoch=100)
 
         total_loss += loss.item()
 
@@ -103,12 +112,9 @@ def train(epoch):
         #     iter_loss = loss.item()
         #     write_to_csv(f'experiresult/{file}/train_log_iter.csv', epoch * len(train_loader) + iteration, iter_loss)
         #     """xiugai"""
-
-        exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.9,
-                         weight_decay_rate=0.8,
-                         lr_decay_epoch=100)
         pbar.set_description(f"Training Epoch {epoch} [{iteration}/{len(train_loader)}]")
         pbar.update(1)# 更新进度条
+
     pbar.close()
     average_loss = total_loss / len(train_loader)  # 计算平均损失
     epoch_time = time.time() - start_time
@@ -128,7 +134,6 @@ def validate(epoch, best_loss):
             outputs = model(data)
             labels = labels.view(labels.shape[0], -1)
             loss = criterion(outputs, labels)
-
             total_loss += loss.item()
             pbar.update(1)
     pbar.close()
@@ -139,12 +144,11 @@ def validate(epoch, best_loss):
     if avg_loss < best_loss:
         best_loss = avg_loss
         save_checkpoint(epoch, 'best', model, optimizer, avg_loss, is_best=True)
-
         print("产生了新的最优结果，模型已经保存!")
     return best_loss
 
 best_loss = float('inf')
-num_epochs = args.epochs # 假设训练 30 个 epochs
+num_epochs = args.epochs # 假设训练 1500 个 epochs
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)

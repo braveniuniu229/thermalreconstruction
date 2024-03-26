@@ -12,19 +12,20 @@ import utils.argsbasic
 wandb.init(
     project='shallow_decoder',
     config={
-        'lr':0.01,
+        'lr':0.001,
         'arch':'shallowdecoderBaseline',
-        'config':[16,60,70,4096],
+        'config':[16,60,65,4096],
         'weightdecay':1e-4,
         'dataset':'typeNum_1',
-        'epochs':3000,
+        'epochs':1000,
         'tag':'baseline',
-        'lr_decay_epoch':300,
-        'batch_size':8000
+        'lr_decay_epoch':100,
+        'batch_size':64,
+        'dropout':False
     }
 )
 model = shallow_decoder(n_sensors=16,outputlayer_size=4096)
-train_loader = DataLoader(dataset_train,batch_size=8000,shuffle=True)
+train_loader = DataLoader(dataset_train,batch_size=64,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=10000,shuffle=False)
 args = wandb.config
 
@@ -32,7 +33,7 @@ file = args.arch +'_'+args.dataset
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
 
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-2,weight_decay=1e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3,weight_decay=1e-4)
 
 criterion = nn.L1Loss()  # 假设使用均方误差损失
 
@@ -108,12 +109,11 @@ def train(epoch):
         #     iter_loss = loss.item()
         #     write_to_csv(f'experiresult/{file}/train_log_iter.csv', epoch * len(train_loader) + iteration, iter_loss)
         #     """xiugai"""
-
-        exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.9,
-                         weight_decay_rate=0.8,
-                         lr_decay_epoch=100)
         pbar.set_description(f"Training Epoch {epoch} [{iteration}/{len(train_loader)}]")
         pbar.update(1)# 更新进度条
+    exp_lr_scheduler(optimizer, epoch, lr_decay_rate=0.9,
+                     weight_decay_rate=0.8,
+                     lr_decay_epoch=100)
     pbar.close()
     average_loss = total_loss / len(train_loader)  # 计算平均损失
     epoch_time = time.time() - start_time
@@ -147,7 +147,7 @@ def validate(epoch, best_loss):
     return best_loss
 
 best_loss = float('inf')
-num_epochs = args.epochs # 假设训练 30 个 epochs
+num_epochs = args.epochs # 假设训练 1500 个 epochs
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)

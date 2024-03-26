@@ -41,13 +41,22 @@ class thermalDataset(Dataset):
         sample_label = sample_label.reshape(64,64)
         sample_data = sample_label[self.points[:,0],self.points[:,1]]
         return sample_data, sample_label
-dataorigin = np.load('../data/Heat_Types500_source4_number200fixed_normalized.npz')
+dataorigin = np.load('../../data/Heat_Types1_source4_number100000fixed_normalized.npz')
 labels = dataorigin['T']
 
 dataset_train = thermalDataset(labels, train=True, train_ratio=0.8)
 dataset_test = thermalDataset(labels, train=False, train_ratio=0.8)
 
 if __name__ =="__main__":
-    trainloader = DataLoader(dataset_train,shuffle=True,batch_size=800)
+    trainloader = DataLoader(dataset_train,shuffle=True,batch_size=36)
     for data ,label in trainloader:
         print(data.shape,label.shape)
+        import matplotlib.pyplot as plt
+        print(data)
+        fig, axis = plt.subplots(6,6,figsize=(16,16),dpi=200)
+        fig.tight_layout()
+        for i in range(36):
+            axis.ravel()[i].imshow(label[i].reshape(64,64),vmin=-2, vmax=2, cmap='bwr')
+            axis.ravel()[i].axis('off')
+        plt.show()
+        break

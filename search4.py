@@ -4,7 +4,7 @@ import tqdm
 from torch.utils.data import DataLoader
 import time
 import os
-from dataset.shallowdecoder.dataset_type_50 import dataset_train,dataset_test
+from dataset.shallowdecoder.dataset_type_1 import dataset_train,dataset_test
 from model.shallowdecodermlp import shallow_decoder
 import csv
 import wandb
@@ -16,7 +16,7 @@ wandb.init(
         'arch':'shallowdecoderBaseline_shallowdecodermlp',
         'config':[16,60,65,300,4096],
         'weightdecay':1e-4,
-        'dataset':'typeNum_50',
+        'dataset':'typeNum_1',
         'epochs':1000,
         'tag':'baseline',
         'lr_decay_epoch':100,

@@ -6,7 +6,7 @@ import numpy as np
 
 
 def normalized():
-    path = '../data/Heat_Types200_source4_number500fixed.npz'
+    path = '../data/Heat_Types10000_source4_number10fixed.npz'
     data = np.load(path)  # 使用self.path来访问实例变量
     origindata = data['T']
     mean = np.mean(origindata.reshape(-1))

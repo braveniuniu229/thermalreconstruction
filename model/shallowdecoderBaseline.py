@@ -8,20 +8,20 @@ class Shallow_decoder(nn.Module):
         self.outputlayer_size = outputlayer_size
 
         self.learn_features = nn.Sequential(
-            nn.Linear(n_sensors, 60),
+            nn.Linear(n_sensors, 55),
             nn.ReLU(True),
-            nn.BatchNorm1d(60),
+            nn.BatchNorm1d(55),
         )
 
         self.learn_coef = nn.Sequential(
-            nn.Linear(60, 70),
+            nn.Linear(55, 65),
             nn.ReLU(True),
-            nn.BatchNorm1d(70),
+            nn.BatchNorm1d(65),
         )
 
 
         self.learn_dictionary = nn.Sequential(
-            nn.Linear(70, self.outputlayer_size),
+            nn.Linear(65, self.outputlayer_size),
         )
 
         for m in self.modules():
@@ -39,7 +39,6 @@ class Shallow_decoder(nn.Module):
 
     def forward(self, x):
         x = self.learn_features(x)
-        x = nn.functional.dropout(x, p=0.1, training=self.training)
         x = self.learn_coef(x)
         x = self.learn_dictionary(x)
         return x

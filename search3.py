@@ -4,7 +4,7 @@ import tqdm
 from torch.utils.data import DataLoader
 import time
 import os
-from dataset.shallowdecoder.dataset_type_50 import dataset_train,dataset_test
+from dataset.shallowdecoder.dataset_type_1 import dataset_train,dataset_test
 from model.shallowdecodermlp import shallow_decoder
 import csv
 import wandb
@@ -12,17 +12,17 @@ import utils.argsbasic
 wandb.init(
     project='shallow_decoder',
     config={
-        'lr':0.01,
-        'arch':'shallowdecoderBaseline_shallowdecodermlp',
-        'config':[16,60,65,300,4096],
+        'lr':0.001,
+        'arch':'shallowdecoderBaseline2',
+        'config':[16,55,65,4096],
         'weightdecay':1e-4,
-        'dataset':'typeNum_50',
+        'dataset':'typeNum_1',
         'epochs':1000,
         'tag':'baseline',
         'lr_decay_epoch':100,
         'batch_size':8000,
         'dropout':False,
-        'num':5
+        'num':4
     }
 )
 model = shallow_decoder(n_sensors=16,outputlayer_size=4096)
@@ -34,7 +34,7 @@ file = args.arch +'_'+args.dataset+str(args.num)
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
 
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-2,weight_decay=1e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3,weight_decay=1e-4)
 
 criterion = nn.L1Loss()  # 假设使用均方误差损失
 
