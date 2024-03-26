@@ -16,7 +16,7 @@ wandb.init(
         'arch':'voronoiUnetBaseline',
         'interval':5,       #进行eval的间隔轮数
         'weightdecay':1e-4,
-        'dataset':'typeNum_1',
+        'dataset':'typeNum_200',
         'epochs':300,
         'tag':'baseline',
         'lr_decay_epoch':100,
