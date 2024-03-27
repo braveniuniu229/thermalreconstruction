@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch
 
 class MaskedDataset(Dataset):
-    def __init__(self, labels,mask_ratio, train=True, train_ratio=0.8):
+    def __init__(self, labels,mask_ratio=0.9, train=True, train_ratio=0.8):
         """
         Custom dataset initializer.
         :param data: The data (e.g., 'T' from your dataset)
@@ -51,10 +51,10 @@ class MaskedDataset(Dataset):
         class_idx = idx // len(self.indices)
         sample_idx_in_class = self.indices[idx % len(self.indices)]
         sample_label = self.labels[class_idx, sample_idx_in_class]
-        sample_label = sample_label.reshape(64,64)
-        masked_label = self.add_random_mask(torch.from_numpy(sample_label))
-        # sample_data = sample_label[self.points[:,0],self.points[:,1]]
-        return  masked_label,sample_label
+        sample_label = sample_label.reshape(64, 64)
+        sample_label_ = torch.from_numpy(sample_label).clone()  # Clone the data to avoid modifying the original label
+        masked_label = self.add_random_mask(sample_label_)
+        return masked_label, sample_label
 dataorigin = np.load('/mnt/d/codespace/DATASETRBF/Heat_Types1000_source4_number100_normalized.npz')
 labels = dataorigin['T']
 
@@ -63,16 +63,26 @@ dataset_test = MaskedDataset(labels, train=False, train_ratio=0.8)
 
 if __name__ =="__main__":
     trainloader = DataLoader(dataset_train,shuffle=True,batch_size=800)
-    for masked_label ,label in trainloader:
-        print(masked_label.shape,label.shape)
+    for masked_label, label in trainloader:
+        print(masked_label.shape, label.shape)
         import matplotlib.pyplot as plt
-
-
         fig, axis = plt.subplots(6, 6, figsize=(16, 16), dpi=200)
-        fig.tight_layout()
-        for i in range(18):
-            axis.ravel()[2*i].imshow(masked_label[i], vmin=-2, vmax=2, cmap='bwr')
-            axis.ravel()[2 * i+1].imshow(label[i], vmin=-2, vmax=2, cmap='bwr')
-            axis.ravel()[i].axis('off')
+        fig.tight_layout(pad=3.0)  # Add some padding between figures
+
+        for i in range(6):  # 6 rows of images
+            for j in range(3):  # 3 pairs of images per row
+                ax1 = axis[i, 2 * j]  # Even index for masked images
+                ax2 = axis[i, 2 * j + 1]  # Odd index for original images
+                masked_img = masked_label[i * 3 + j].cpu().numpy()
+                original_img = label[i * 3 + j].cpu().numpy()
+
+                ax1.imshow(masked_img, vmin=-2, vmax=2, cmap='bwr')
+                ax1.set_title('Masked')
+                ax1.axis('off')
+
+                ax2.imshow(original_img, vmin=-2, vmax=2, cmap='bwr')
+                ax2.set_title('Original')
+                ax2.axis('off')
+
         plt.show()
-        break
+        break  # Only show the first batch
