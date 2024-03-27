@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch
 
 class MaskedDataset(Dataset):
-    def __init__(self, labels,mask_ratio=0.9, train=True, train_ratio=0.8):
+    def __init__(self, labels,mask_ratio=0.99, train=True, train_ratio=0.99):
         """
         Custom dataset initializer.
         :param data: The data (e.g., 'T' from your dataset)
@@ -55,7 +55,7 @@ class MaskedDataset(Dataset):
         sample_label_ = torch.from_numpy(sample_label).clone()  # Clone the data to avoid modifying the original label
         masked_label = self.add_random_mask(sample_label_)
         return masked_label, sample_label
-dataorigin = np.load('./data/Heat_Types10000_source4_number10fixed_normalized.npz')
+dataorigin = np.load('../data/Heat_Types10000_source4_number10fixed_normalized.npz')
 labels = dataorigin['T']
 
 dataset_train = MaskedDataset(labels, train=True, train_ratio=0.8)
@@ -66,9 +66,10 @@ if __name__ =="__main__":
     for masked_label, label in trainloader:
         print(masked_label.shape, label.shape)
         import matplotlib.pyplot as plt
-        fig, axis = plt.subplots(6, 6, figsize=(16, 16), dpi=200)
-        fig.tight_layout(pad=3.0)  # Add some padding between figures
 
+        fig, axis = plt.subplots(6, 6, figsize=(12, 12), dpi=200)  # Smaller figsize
+        plt.subplots_adjust(wspace=0.1, hspace=0.1)  # Reduce the space between images
+        fig.suptitle('Masked&Original Images masked_ratio:0.99', fontsize=16)
         for i in range(6):  # 6 rows of images
             for j in range(3):  # 3 pairs of images per row
                 ax1 = axis[i, 2 * j]  # Even index for masked images
@@ -77,12 +78,12 @@ if __name__ =="__main__":
                 original_img = label[i * 3 + j].cpu().numpy()
 
                 ax1.imshow(masked_img, vmin=-2, vmax=2, cmap='bwr')
-                ax1.set_title('Masked')
+                ax1.set_title('Masked figure', fontsize=8)
                 ax1.axis('off')
 
                 ax2.imshow(original_img, vmin=-2, vmax=2, cmap='bwr')
-                ax2.set_title('Original')
+                ax2.set_title('Original figure', fontsize=8)
                 ax2.axis('off')
 
         plt.show()
-        break  # Only show the first batch
+        break
