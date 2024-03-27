@@ -55,7 +55,7 @@ class MaskedDataset(Dataset):
         sample_label_ = torch.from_numpy(sample_label).clone()  # Clone the data to avoid modifying the original label
         masked_label = self.add_random_mask(sample_label_)
         return masked_label, sample_label
-dataorigin = np.load('/mnt/d/codespace/DATASETRBF/Heat_Types1000_source4_number100_normalized.npz')
+dataorigin = np.load('./data/Heat_Types10000_source4_number10fixed_normalized.npz')
 labels = dataorigin['T']
 
 dataset_train = MaskedDataset(labels, train=True, train_ratio=0.8)
