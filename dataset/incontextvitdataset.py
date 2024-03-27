@@ -5,7 +5,7 @@ from scipy.interpolate import griddata
 # 无论是做voronoi划分还是直接一维输入都可以，而且可以保证两次的坐标索引是相同的很自由
 
 class thermalDataset_vor(Dataset):
-    def __init__(self, labels, train=True, train_ratio=0.8,exp_num:int=5):
+    def __init__(self, labels, exp_num,train=True, train_ratio=0.8):
         """
         Custom dataset initializer.
         :param data: The data (e.g., 'T' from your dataset)
