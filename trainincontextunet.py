@@ -27,7 +27,7 @@ wandb.init(
     }
 )
 #定义训练的模型
-model = mainUNet(sample_num=2)
+model = mainUNet(sample_num=1)
 args = wandb.config
 train_loader = DataLoader(dataset_train,batch_size=args.batch_size,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
@@ -140,7 +140,7 @@ def validate(epoch, best_loss):
         for iteration, (com, labels, samples) in enumerate(test_loader):
             com, labels, samples = com, labels, samples
             com, labels, samples = com.to(device).to(torch.float32), labels.to(device).to(torch.float32), samples.to(device).to(torch.float32)
-            outputs = model(com,labels)
+            outputs = model(com,samples)
             outputs = outputs.squeeze(1)
             loss = criterion(outputs, labels)
             total_loss += loss.item()
