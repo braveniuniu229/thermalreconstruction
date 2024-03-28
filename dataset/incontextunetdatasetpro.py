@@ -33,7 +33,7 @@ class thermalDataset_vor(Dataset):
     def __len__(self):
         return len(self.indices) * self.labels.shape[0]  # Total number of samples
 
-    def apply_uniform_or_random_mask(self,samples,  mask_type='random'):
+    def apply_uniform_or_random_mask(self,samples,  mask_type='uniform'):
         """
         Apply either a uniform or a random mask to the samples.
 
