@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from unetseries import _EncoderBlock,_DecoderBlock,UNet
+from model.unetseries import _EncoderBlock,_DecoderBlock,UNet
 import torch.nn.functional as F
 
 class sampleproj(nn.Module):
@@ -57,10 +57,10 @@ class mainUNet(nn.Module):
         )
         self.final = nn.Conv2d(64, out_channels, kernel_size=1)
 
-    def forward(self, samples,x):
+    def forward(self, com,samples):
         samples_proj = self.projlayer(samples)
         samples_embedding = self.samplesEncoder(samples_proj)
-        enc1 = self.enc1(x)
+        enc1 = self.enc1(com)
         enc2 = self.enc2(enc1)
         enc3 = self.enc3(enc2)
         enc4 = self.enc4(enc3)

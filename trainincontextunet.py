@@ -12,7 +12,8 @@ import utils.argsbasic
 wandb.init(
     project='incontext_unet',
     config={
-        'lr':0.001,
+        'normal_lr':0.001,
+        'low_lr':1e-5,
         'arch':'incontextunet',
         'interval':5,       #进行eval的间隔轮数
         'weightdecay':1e-4,
@@ -25,7 +26,8 @@ wandb.init(
         'dropout':False
     }
 )
-incontextModel = mainUNet(sample_num=2)
+#定义训练的模型
+model = mainUNet(sample_num=2)
 args = wandb.config
 train_loader = DataLoader(dataset_train,batch_size=args.batch_size,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
@@ -33,25 +35,25 @@ test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
 file = args.arch +'_'+args.dataset+'basedratio'+str(args.based_mask_ratio)+args.tag
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
-pretrainedunet_ckpt = torch.load('pth')
-pretrainedunet_dict = pretrainedunet_ckpt['state_dict']
+pretrainedunet_ckpt = torch.load('./checkpoint/maskedunet_typeNum_100000.7/checkpoint_best.pth')
+pretrainedunet_dict = pretrainedunet_ckpt['model_state_dict']
 for name,param in pretrainedunet_dict.items():
-    if name in incontextModel.samplesEncoder.state_dict():
+    if name in model.samplesEncoder.state_dict():
         # 我们使用 getattr 来获得对应的新模型的属性（层）的引用
         # 然后将预训练的参数复制到这些属性（层）中
-        setattr(incontextModel.samplesEncoder, name, param)
-for name, param in incontextModel.samplesEncoder.named_parameters():
-    param.requires_grad = False
-# 验证权重是否加载成功
-# 通过打印新模型的某个参数的权重，与加载的权重进行对比
-param_to_check = 'enc1.conv1.weight'  # 以这个参数为例
-loaded_weight = pretrainedunet_dict[param_to_check].data
-new_model_weight = getattr(incontextModel.samplesEncoder, param_to_check).data
+        setattr(model.samplesEncoder, name, param)
+# 创建一个参数组的列表，为 incontext_encoder 设置低学习率，为其他参数设置标准学习率
+low_lr_layers = [param for name, param in model.samplesEncoder.named_parameters()]
+other_parameters = [param for name, param in model.named_parameters() if not name.startswith('samplesEncoder.')]
+low_lr = args.low_lr
+normal_lr = args.normal_lr
+# 创建优化器参数组
+optimizer_parameters = [
+    {'params': low_lr_layers, 'lr': low_lr},
+    {'params': other_parameters, 'lr': normal_lr}
+]
 
-# 打印权重对比结果，以验证是否相同
-print("Weights match: ", torch.equal(loaded_weight, new_model_weight))
-
-optimizer = torch.optim.Adam(incontextModel.parameters(), lr=args.lr)
+optimizer = torch.optim.Adam(optimizer_parameters)
 scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.98)
 criterion = nn.L1Loss()  # 假设使用均方误差损失
 
@@ -102,12 +104,11 @@ def train(epoch):
 
     total_loss = 0  # 用于累积每个 epoch 的总损失
     pbar = tqdm.tqdm(total=len(train_loader), desc=f"Training Epoch {epoch}", leave=True,colour='white')
-    for iteration, (masked_labels,labels) in enumerate(train_loader):
-        masked_labels,labels = masked_labels,labels
-        masked_labels,labels = masked_labels.to(device).to(torch.float32),labels.to(device).to(torch.float32)
-        masked_labels = masked_labels.unsqueeze(1)
+    for iteration, (com,labels,samples) in enumerate(train_loader):
+        com,labels,samples = com,labels,samples
+        com,labels,samples = com.to(device).to(torch.float32),labels.to(device).to(torch.float32),samples.to(device).to(torch.float32)
         optimizer.zero_grad()
-        outputs = model(masked_labels)
+        outputs = model(com,samples)
         outputs = outputs.squeeze(1)
         loss = criterion(outputs,labels)
         loss.backward()
@@ -136,11 +137,10 @@ def validate(epoch, best_loss):
     total_loss = 0
     with torch.no_grad():
         pbar = tqdm.tqdm(total=len(test_loader), desc=f"Training Epoch {epoch}", leave=True, colour='white')
-        for iteration, (masked_labels, labels) in enumerate(test_loader):
-            masked_labels, labels = masked_labels, labels
-            masked_labels, labels = masked_labels.to(device).to(torch.float32), labels.to(device).to(torch.float32)
-            masked_labels = masked_labels.unsqueeze(1)
-            outputs = model(masked_labels)
+        for iteration, (com, labels, samples) in enumerate(test_loader):
+            com, labels, samples = com, labels, samples
+            com, labels, samples = com.to(device).to(torch.float32), labels.to(device).to(torch.float32), samples.to(device).to(torch.float32)
+            outputs = model(com,labels)
             outputs = outputs.squeeze(1)
             loss = criterion(outputs, labels)
             total_loss += loss.item()

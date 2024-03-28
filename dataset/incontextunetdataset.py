@@ -59,12 +59,14 @@ class thermalDataset_vor(Dataset):
 dataorigin = np.load('./data/Heat_Types10000_source4_number10fixed_normalized.npz')
 labels = dataorigin['T']
 
-dataset_train = thermalDataset_vor(labels, train=True, train_ratio=0.8)
-dataset_test = thermalDataset_vor(labels, train=False, train_ratio=0.8)
+dataset_train = thermalDataset_vor(labels, exp_num=2,train=True, train_ratio=0.8)
+dataset_test = thermalDataset_vor(labels, exp_num=2,train=False, train_ratio=0.8)
 
 if __name__ =="__main__":
     train_loader = DataLoader(dataset_train,batch_size=10,shuffle=True)
     for i,(com,labels,samples) in enumerate(train_loader):
         print(com.shape)
         print(labels.shape)
+        print(samples.shape)
+        break
 
