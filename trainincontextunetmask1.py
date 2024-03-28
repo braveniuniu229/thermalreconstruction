@@ -25,7 +25,7 @@ wandb.init(
         'batch_size':8,
         'dropout':False,
         'samples_masked':True,
-        'sample_num':2
+        'sample_num':1
     }
 )
 #定义训练的模型
