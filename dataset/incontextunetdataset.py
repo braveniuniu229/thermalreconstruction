@@ -58,6 +58,8 @@ class thermalDataset_vor(Dataset):
         return combined_data,true_label,samples
 dataorigin = np.load('./data/Heat_Types10000_source4_number10fixed_normalized.npz')
 labels = dataorigin['T']
+mean = dataorigin['m']
+stdvar = dataorigin['v']
 
 dataset_train = thermalDataset_vor(labels, exp_num=1,train=True, train_ratio=0.8)
 dataset_test = thermalDataset_vor(labels, exp_num=1,train=False, train_ratio=0.8)
