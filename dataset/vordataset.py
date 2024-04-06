@@ -53,11 +53,11 @@ class thermalDataset_vor(Dataset):
         # 将拓展后的mask和插值后的温度场拼接在一起
         combined_data = np.concatenate([voronoidata_exp, mask_exp], axis=0)
         return combined_data,sample_label
-dataorigin = np.load('./data/Heat_Types500_source4_number200fixed_normalized.npz')
+dataorigin = np.load('./data/Heat_Types10_source4_number30fixed_normalized.npz')
 labels = dataorigin['T']
 
 dataset_train = thermalDataset_vor(labels, train=True, train_ratio=0.8)
-dataset_test = thermalDataset_vor(labels, train=False, train_ratio=0.8)
+dataset_test = thermalDataset_vor(labels, train=False, train_ratio=0)
 
 if __name__ =="__main__":
     train_loader = DataLoader(dataset_train,batch_size=10,shuffle=True)

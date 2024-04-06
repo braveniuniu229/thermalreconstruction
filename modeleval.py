@@ -6,57 +6,82 @@ import os
 from torch.utils.data import DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
+from model.unetseries import UNet
+from dataset.vordataset import dataset_train,dataset_test
+from mpl_toolkits.axes_grid1 import make_axes_locatable
  #加载模型
 test_loader = DataLoader(dataset_test,batch_size=300)
 model = mainUNet(sample_num=1)
-model_ckpt = torch.load('path')
+model2 = UNet(in_channels=2,out_channels=1)
+model_ckpt = torch.load('./checkpoint/voronoiUnetBaseline_typeNum_10000/checkpoint_best.pth')
 model_state_dict = model_ckpt['model_state_dict']
-model.load_state_dict(model_state_dict)
+model2.load_state_dict(model_state_dict)
 device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
 criterion = nn.L1Loss()
 
-dataorigin = np.load('./data/Heat_Types10000_source4_number10fixed_normalized.npz')
+dataorigin = np.load('./data/Heat_Types10_source4_number30fixed_normalized.npz')
 mean = dataorigin['m']
 stdvar = dataorigin['v']
 def eval(model):
+    model.to(device)
     model.eval()
     total_loss =0
     with torch.no_grad():
-        for iteration, (com, labels, samples) in enumerate(test_loader):
-            com, labels, samples = com, labels, samples
-            com, labels, samples = com.to(device).to(torch.float32), labels.to(device).to(torch.float32), samples.to(
-                device).to(torch.float32)
-            outputs = model(com, samples)
+        for iteration, (com, labels) in enumerate(test_loader):
+            com, labels= com, labels
+            com, labels= com.to(device).to(torch.float32), labels.to(device).to(torch.float32)
+
+            outputs = model(com)
             outputs = outputs.squeeze(1)
             loss = criterion(outputs, labels)
-            outputs_np = outputs.detach().numpy()
-            outputs_np = (outputs_np+mean)*stdvar
-            labels_np = labels.detach().numpy()
-            labels_np = (labels_np+mean)*stdvar
-            total_loss += loss.item()
-            loss = (outputs-labels)*stdvar
-            loss_ref = (outputs-labels)/labels
+            total_loss +=loss
+            outputs_np = (outputs.cpu().numpy() + mean) * stdvar
+            labels_np = (labels.cpu().numpy() + mean) * stdvar
 
-            fig, axis = plt.subplots(5, 4, figsize=(10, 8), dpi=200)  # Smaller figsize
-            plt.subplots_adjust(wspace=0.1, hspace=0.1)  # Reduce the space between images
-            fig.suptitle('eval result on ood situation', fontsize=16)
-            for i in range(5):  # 6 rows of images
-                    ax1 = axis[i, 1]  # Even index for masked images
-                    ax1.imshow(outputs_np[i], vmin=-2, vmax=2, cmap='bwr')
-                    ax1.set_title('output', fontsize=8)
-                    ax1.axis('off')
-                    ax2 = axis[i, 2]  # Even index for masked images
-                    ax2.imshow(labels_np[i], vmin=-2, vmax=2, cmap='bwr')
-                    ax2.set_title('real', fontsize=8)
-                    ax2.axis('off')
-                    ax3 = axis[i, 3]  # Even index for masked images
-                    ax3.imshow(loss[i], vmin=-2, vmax=2, cmap='bwr')
-                    ax3.set_title('loss', fontsize=8)
-                    ax3.axis('off')
-                    ax4 = axis[i, 4]  # Even index for masked images
-                    ax4.imshow(loss_ref[4], vmin=-2, vmax=2, cmap='bwr')
-                    ax4.set_title('loss_ref', fontsize=8)
-                    ax4.axis('off')
+            # 计算逆标准化后的 loss，这里不应该用原始的 stdvar 直接乘，因为它是全局标量
+            # 如果 stdvar 是单一值，确保它转换为 tensor 以匹配维度
+            stdvar_tensor = torch.tensor(stdvar, device=device, dtype=torch.float32)
+            loss_scaled = (outputs - labels) * stdvar_tensor
+
+            # 从 CUDA 转移回 CPU，然后转换为 numpy
+            loss_np = loss_scaled.cpu().numpy()
+            loss_ref = (loss_np / labels).cpu().numpy()
+
+            fig, axis = plt.subplots(5, 4, figsize=(12, 10), dpi=100)  # Adjust figsize to give more space
+            fig.suptitle('Eval Result on OOD Situation', fontsize=16, weight='bold')
+
+            # Set common color limits for the output and real images for better comparison
+            color_limit_output_real = [min(outputs_np.min(), labels_np.min()), max(outputs_np.max(), labels_np.max())]
+
+            for i in range(5):
+                for j in range(4):
+                    ax = axis[i, j]
+                    if j == 0:  # Output
+                        im = ax.imshow(outputs_np[i], cmap='coolwarm', vmin=color_limit_output_real[0],
+                                       vmax=color_limit_output_real[1])
+                        if i == 0: ax.set_title('Output', fontsize=10, weight='bold')
+                    elif j == 1:  # Real
+                        im = ax.imshow(labels_np[i], cmap='coolwarm', vmin=color_limit_output_real[0],
+                                       vmax=color_limit_output_real[1])
+                        if i == 0: ax.set_title('Real', fontsize=10, weight='bold')
+                    elif j == 2:  # Loss
+                        # Use diverging colormap centered around zero
+                        im = ax.imshow(loss_np[i], cmap='seismic', vmin=-np.abs(loss_np).max(),
+                                       vmax=np.abs(loss_np).max())
+                        if i == 0: ax.set_title('Loss', fontsize=10, weight='bold')
+                    elif j == 3:  # Loss Ref
+                        # Adjust the scale for loss reference if it's too small/large
+                        scale_factor = np.abs(loss_ref).max() if np.abs(loss_ref).max() != 0 else 1
+                        im = ax.imshow(loss_ref[i], cmap='seismic', vmin=-scale_factor, vmax=scale_factor)
+                        if i == 0: ax.set_title('Loss Ref', fontsize=10, weight='bold')
+
+                    # Hide axes and add colorbar to each subplot
+                    ax.axis('off')
+                    divider = make_axes_locatable(ax)
+                    cax = divider.append_axes("right", size="5%", pad=0.05)
+                    plt.colorbar(im, cax=cax)
+
+            plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Adjust the layout
             plt.show()
 
 
@@ -64,4 +89,4 @@ def eval(model):
     avg_loss = total_loss / len(test_loader)
     print((avg_loss))
 if __name__=="__main__":
-    eval()
+    eval(model2)

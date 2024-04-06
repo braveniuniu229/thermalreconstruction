@@ -17,7 +17,7 @@ wandb.init(
         'arch':'incontextunet',
         'interval':5,       #进行eval的间隔轮数
         'weightdecay':1e-4,
-        'dataset':'typeNum_10000',
+        'dataset':'typeNum_500',
         'based_mask_ratio':0.7,
         'epochs':300,
         'tag':'finetune_with_diff_lr',
@@ -32,10 +32,10 @@ args = wandb.config
 train_loader = DataLoader(dataset_train,batch_size=args.batch_size,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
 
-file = args.arch +'_'+args.dataset+'basedratio'+str(args.based_mask_ratio)+args.tag
+file = args.arch +'_'+args.dataset+'_ratio'+str(args.based_mask_ratio)+args.tag
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
-pretrainedunet_ckpt = torch.load('./checkpoint/maskedunet_typeNum_100000.7/checkpoint_best.pth')
+pretrainedunet_ckpt = torch.load('./checkpoint/maskedunet_typeNum_500maskratio_0.7/checkpoint_best.pth')
 pretrainedunet_dict = pretrainedunet_ckpt['model_state_dict']
 for name,param in pretrainedunet_dict.items():
     if name in model.samplesEncoder.state_dict():

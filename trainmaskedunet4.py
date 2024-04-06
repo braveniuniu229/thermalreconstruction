@@ -16,8 +16,8 @@ wandb.init(
         'arch':'maskedunet',
         'interval':5,       #进行eval的间隔轮数
         'weightdecay':1e-4,
-        'dataset':'typeNum_10000',
-        'mask_ratio':0.85,
+        'dataset':'typeNum_1',
+        'mask_ratio':0.7,
         'epochs':300,
         'tag':'baseline',
         'lr_decay_epoch':100,
@@ -30,7 +30,7 @@ args = wandb.config
 train_loader = DataLoader(dataset_train,batch_size=args.batch_size,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
 
-file = args.arch +'_'+args.dataset+str(args.mask_ratio)
+file = args.arch +'_'+args.dataset+'maskratio_'+str(args.mask_ratio)
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
 

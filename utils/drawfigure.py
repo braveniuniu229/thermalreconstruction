@@ -23,7 +23,7 @@ def Exact_plot(i, j, myz_true):
     ax.set_xlabel('$y$', font2)
     ax.set_ylabel('$x$', font2)
     # ax[0].set_aspect('equal', 'box')
-    ax.set_title('F', fontsize=17)
+    ax.set_title('Final Temperature distribution', fontsize=17)
     fig = plt.gcf()
 
 

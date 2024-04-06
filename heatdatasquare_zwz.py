@@ -57,7 +57,7 @@ def  makeMatrix_A(nodes,groups,n,phi,order,N):
 
 
 
-def makesquaredata(type_num,source_num,nodes,groups,n,phi,order,observation_idx,A,data_num_per_type,Data_list,F_list,Obs,Data_list_ood,Source,N):
+def makesquaredata(type_num,source_num,nodes,groups,n,phi,order,A,data_num_per_type,Data_list,F_list,Obs,Data_list_ood,Source,N):
     for i in range(type_num):
         #热源位置
         a = np.random.uniform(0.1, 1.9, source_num)  # (4,)
@@ -73,7 +73,7 @@ def makesquaredata(type_num,source_num,nodes,groups,n,phi,order,observation_idx,
 
         for j in range(data_num_per_type):
             # 设置c为传导率
-            c = np.random.uniform(10000, 20000, source_num)
+            c = np.random.uniform(1000, 6000, source_num)
             # c_ood = np.random.uniform(10000, 60000, source_num)
             source.append([a,b,c])
             yr = PDE(source_num,a,b,c,nodes[:,0], nodes[:,1])
@@ -195,7 +195,7 @@ def main():
                    n=n,
                    phi=phi,
                    order=order,
-                   observation_idx=observation_idx,
+
                    A=A,
                    Data_list=Data_list,
                    Data_list_ood=Data_list_ood,

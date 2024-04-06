@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from model.incontextunet import mainUNet
-from dataset.incontextunetdatasetpro import dataset_train,dataset_test
+from dataset.incontextunetdataset import dataset_train,dataset_test
 import os
 import tqdm
 from torch.utils.data import DataLoader
@@ -17,28 +17,25 @@ wandb.init(
         'arch':'incontextunet',
         'interval':5,       #进行eval的间隔轮数
         'weightdecay':1e-4,
-        'dataset':'typeNum_10000',
-        'based_mask_ratio':0.8,
+        'dataset':'typeNum_50',
+        'based_mask_ratio':0.7,
         'epochs':300,
         'tag':'finetune_with_diff_lr',
         'lr_decay_epoch':100,
         'batch_size':8,
-        'dropout':False,
-        'samples_masked':True,
-        'sample_num':2
+        'dropout':False
     }
 )
 #定义训练的模型
-
+model = mainUNet(sample_num=1)
 args = wandb.config
-model = mainUNet(sample_num=args.sample_num)
 train_loader = DataLoader(dataset_train,batch_size=args.batch_size,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
 
-file = args.arch +'_'+args.dataset+'basedratio'+str(args.based_mask_ratio)+args.tag+'samplenum_'+str(args.sample_num)
+file = args.arch +'_'+args.dataset+'basedratio'+str(args.based_mask_ratio)+args.tag
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
-pretrainedunet_ckpt = torch.load('./checkpoint/maskedunet_typeNum_100000.8/checkpoint_best.pth')
+pretrainedunet_ckpt = torch.load('./checkpoint/maskedunet_typeNum_50_0.7/checkpoint_best.pth')
 pretrainedunet_dict = pretrainedunet_ckpt['model_state_dict']
 for name,param in pretrainedunet_dict.items():
     if name in model.samplesEncoder.state_dict():
