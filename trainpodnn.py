@@ -35,7 +35,22 @@ pod_data = pod_data.reshape(-1,64,64)
 
 model = shallow_decoder(n_sensors=16,outputlayer_size=4096)
 gappy_pod = GappyPodWeight(
-    data = pod_data,map_size=pod_data.shape[-2:],n_components=50,observe_weight=50
+    data = pod_data,map_size=pod_data.shape[-2:],n_components=50,observe_weight=50,positions = np.array([[8,8],
+ [23,8],
+ [39,8],
+ [55,8],
+ [8,23],
+ [23,23],
+ [39,23],
+ [55,23],
+ [8,39],
+ [23,39],
+ [39,39],
+ [55,39],
+ [8,55],
+ [23,55],
+ [39,55],
+ [55,55]])
 )
 test_loader = DataLoader(dataset_test,batch_size=128,shuffle=False)
 args = wandb.config
@@ -91,8 +106,10 @@ def test():
         pre =pre.view(-1,64,64)
         loss1 = criterion(pre,labels)
         total_loss1 += loss1.item()
-        pre = gappy_pod.reconstruct(pre, data, weight=torch.ones_like(pre))
-        loss2 = criterion(pre,labels)
+
+        pres = gappy_pod.reconstruct(pre, data, weight=torch.ones_like(pre))
+        pres = pres.squeeze(1)
+        loss2 = criterion(pres,labels)
         total_loss2 += loss2.item()
 
         # if (iteration+1)%200 == 0:

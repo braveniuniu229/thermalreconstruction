@@ -50,16 +50,12 @@ class GappyPod():
 
 
 class GappyPodWeight():
-    def __init__(self, data, map_size=(64,64), n_components=50,
-                  observe_weight=50):
+    def __init__(self, data, map_size=(64,64), n_components=50,positions = np.array([[8,8],[23,8],[39,8],[55,8],[8,23],[23,23],[39,23],[55,23],[8,39],[23 ,39],[39 ,39],[55,39],[8,55],[23,55],[39,55],[55,55]])
+,observe_weight=50):
         self.data = data
         self.pca = PCA(n_components=n_components)
         self.pca.fit(self.data.reshape(data.shape[0], -1))
-        x = np.linspace(8, 55, 4, dtype=int)
-        y = np.linspace(8, 55, 4, dtype=int)
-        xv, yv = np.meshgrid(x, y)
-        points = np.vstack([xv.ravel(), yv.ravel()]).T
-        self.positions_observe = points
+        self.positions_observe = positions
         self.positions_pre = np.array([[i, j] for i in range(map_size[0]) for j in range(map_size[1])])
         self.map_size = map_size
         self.observe_weight = observe_weight
