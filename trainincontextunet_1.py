@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from model.incontextunet import mainUNet
+from model.incontextunetpro import mainUNet
 from dataset.incontextunetdataset import dataset_train,dataset_test
 import os
 import tqdm
