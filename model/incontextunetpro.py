@@ -3,21 +3,6 @@ import torch.nn as nn
 from model.unetseries import _EncoderBlock,_DecoderBlock,UNet
 import torch.nn.functional as F
 
-class sampleproj(nn.Module):
-    def __init__(self,middle_channels,bn=False):
-        super().__init__()
-        self.proj=nn.Sequential(
-            nn.Conv2d(1, middle_channels, kernel_size=3, padding=1),
-            nn.BatchNorm2d(middle_channels) if bn else nn.GroupNorm(32, middle_channels),
-            nn.GELU(),
-            nn.Conv2d(middle_channels, middle_channels, kernel_size=3, padding=1),
-            nn.BatchNorm2d(middle_channels) if bn else nn.GroupNorm(32, middle_channels),
-            nn.GELU(),
-            nn.Conv2d(middle_channels, 1, kernel_size=3, padding=1)
-        )
-    def forward(self,x):
-        out = self.proj(x)
-        return out
 
 class incontext_encoder(nn.Module):
     def __init__(self,in_channels=1,bn=False):
@@ -40,7 +25,6 @@ class incontext_encoder(nn.Module):
 class mainUNet(nn.Module):
     def __init__(self, sample_num,in_channels=2, out_channels=1, bn=False):
         super(mainUNet, self).__init__()
-        self.projlayer1 = sampleproj(middle_channels=32)
         self.samplesEncoder = incontext_encoder()
         self.enc1 = _EncoderBlock(in_channels, 32, polling=False, bn=bn)
         self.enc2 = _EncoderBlock(32, 64, bn=bn)
@@ -65,8 +49,7 @@ class mainUNet(nn.Module):
         # 逐个样本进行projlayer1的前向传播
         for i in range(sample_num):
             sample_i = samples[:, i, :, :].unsqueeze(1)  # 获取第i个样本，并增加一个维度，形状变为[10, 1, 64, 64]
-            sample_i_proj = self.projlayer1(sample_i)  # 通过projlayer1，输出形状仍为[10, 1, 64, 64]
-            embedding = self.samplesEncoder(sample_i_proj)
+            embedding = self.samplesEncoder(sample_i)
             embeddings.append(embedding)
         embeddings = torch.cat(embeddings,dim=1)
         enc1 = self.enc1(com)

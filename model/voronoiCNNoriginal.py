@@ -30,9 +30,9 @@ class VoronoiCNN(nn.Module):
 # 实例化模型
 model = VoronoiCNN()
 
-# 编译模型
-
-x = torch.randn(10,2,64,64)  #out (b,1,64,64)
-out = model(x) #
-out = out.squeeze(1)
-print(out.shape)
+# # 编译模型
+#
+# x = torch.randn(10,2,64,64)  #out (b,1,64,64)
+# out = model(x) #
+# out = out.squeeze(1)
+# print(out.shape)
