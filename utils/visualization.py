@@ -5,7 +5,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sbs
-import cmocean
+
 
 sbs.set_style('whitegrid')
 
@@ -54,6 +54,53 @@ def plot3x1beta(input, pres, fields, file_name):
     plt.tight_layout()
     plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
     plt.close()
+def plot4x1beta(input, pres, fields, file_name):
+    fig, axis = plt.subplots(1, 4, figsize=(10, 5), dpi=300)
+    plt.subplots_adjust(wspace=0.1, hspace=0.1)
+
+    # 对于每个子图添加色标，但不设置标签
+    im_input = axis[0].imshow(input, vmin=-2, vmax=2, cmap=cmocean.cm.balance)
+    axis[0].axis('off')
+    fig.colorbar(im_input, ax=axis[0], fraction=0.046, pad=0.04)
+
+    im_fields = axis[1].imshow(pres, vmin=-2, vmax=2, cmap=cmocean.cm.balance)
+    axis[1].axis('off')
+    fig.colorbar(im_fields, ax=axis[1], fraction=0.046, pad=0.04)
+
+    error = fields - pres
+    max_error = np.percentile(np.abs(error), 99)
+    im_error = axis[2].imshow(error, vmin=-max_error, vmax=max_error, cmap=cmocean.cm.balance)
+    axis[2].axis('off')
+    fig.colorbar(im_error, ax=axis[2], fraction=0.046, pad=0.04)
+
+    plt.tight_layout()
+    plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+import matplotlib.pyplot as plt
+import numpy as np
+import cmocean
+
+def plot_single(fields,pres, file_name):
+    fig, ax = plt.subplots(figsize=(5, 5), dpi=300)  # 将画布设置为正方形或者根据需要调整
+    error = fields - pres
+    max_error = np.percentile(np.abs(error), 95)
+    # 显示图像
+    im = ax.imshow(error, vmin=-max_error, vmax=max_error, cmap=cmocean.cm.balance)
+    ax.axis('off')  # 关闭轴标签和刻度线
+
+    # 添加色标
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
+    # 紧凑布局
+    plt.tight_layout()
+    # 保存图像
+    plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
+    # 关闭画布以释放内存
+    plt.close()
+
+# 你需要替换 input_data 和 'output_file_path.png' 为你的数据和文件名
+# plot_single(input_data, 'output_file_path.png')
 
 def plot3x1_coor(input,fields, pres, file_name, x_coor, y_coor):
 
@@ -96,7 +143,7 @@ def plot3x1_coor(input,fields, pres, file_name, x_coor, y_coor):
     plt.close()
 
 
-def plot_locations(positions, fields):
+def plot_locations(positions, fields,file_name):
     """
     绘制测点位置
     :param positions: (n, 2) 包含n个测点的位置
@@ -106,7 +153,7 @@ def plot_locations(positions, fields):
     h, w = fields.shape
     x_coor, y_coor = np.linspace(0, w - 1, w), np.linspace(h - 1, 0, h)
     x_coor, y_coor = np.meshgrid(x_coor, y_coor)
-    x_coor, y_coor = x_coor / 100.0, y_coor / 100.0
+    x_coor, y_coor = x_coor / 64, y_coor / 64
 
     x, y = [], []
     for i in range(positions.shape[0]):
@@ -114,12 +161,17 @@ def plot_locations(positions, fields):
         y.append(y_coor[positions[i, 0], positions[i, 1]])
 
     # plt.contourf(x_coor, y_coor, fields, levels=100, cmap='jet')
-    plt.figure(figsize=(9.6, 5.6))
+    plt.figure(figsize=(5, 5))
     plt.axis('off')
-    plt.pcolormesh(x_coor, y_coor, fields, cmap='seismic')
+    plt.pcolormesh(x_coor, y_coor, fields, cmap='bwr')
     # plt.contourf(x_coor, y_coor, fields, levels=100, cmap=cmocean.cm.balance)
     plt.scatter(x, y, c='black')
-    plt.show()
+    # 紧凑布局
+    plt.tight_layout()
+    # 保存图像
+    plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
+    # 关闭画布以释放内存
+    plt.close()
 
 
 def plot_results(positions, fields):
