@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from model.incontextunet import mainUNet
+from utils.visualization import plot3x1
 from dataset.incontextunetdataset import dataset_test
 import os
 from torch.utils.data import DataLoader

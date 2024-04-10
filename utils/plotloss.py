@@ -33,7 +33,7 @@ plt.xlim(left=0)
 
 # 设置y轴为对数刻度
 plt.yscale('log')
-plt.ylim(5e-4, 1e-1)
+plt.ylim(1e-5, 1e-1)
 
 # 设置标签和标题
 plt.xlabel('Epoch')
