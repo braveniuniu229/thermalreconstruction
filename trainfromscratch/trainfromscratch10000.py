@@ -9,23 +9,23 @@ import time
 import csv
 import wandb
 import utils.argsbasic
-wandb.init(
-    project='incontext_unet',
-    config={
-        'normal_lr':0.001,
-        'low_lr':1e-5,
-        'arch':'sratchincontextunet',
-        'interval':5,       #进行eval的间隔轮数
-        'weightdecay':1e-4,
-        'dataset':'typeNum_50',
-        'based_mask_ratio':0.7,
-        'epochs':300,
-        'tag':'finetune_with_diff_lr',
-        'lr_decay_epoch':100,
-        'batch_size':8,
-        'dropout':False
-    }
-)
+# wandb.init(
+#     project='incontext_unet',
+#     config={
+#         'normal_lr':0.001,
+#         'low_lr':1e-5,
+#         'arch':'sratchincontextunet',
+#         'interval':5,       #进行eval的间隔轮数
+#         'weightdecay':1e-4,
+#         'dataset':'typeNum_50',
+#         'based_mask_ratio':0.7,
+#         'epochs':300,
+#         'tag':'finetune_with_diff_lr',
+#         'lr_decay_epoch':100,
+#         'batch_size':8,
+#         'dropout':False
+#     }
+# )
 #定义训练的模型
 model = mainUNet(sample_num=1)
 # args = wandb.config
