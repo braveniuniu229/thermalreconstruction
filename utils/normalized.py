@@ -6,7 +6,7 @@ import numpy as np
 
 
 def normalized():
-    path = '../data/Heat_Types10_source4_number30fixed.npz'
+    path = '../data/Heat_Types2000_source4_number50fixed.npz'
     data = np.load(path)  # 使用self.path来访问实例变量
     origindata = data['T']
     source = data['S']

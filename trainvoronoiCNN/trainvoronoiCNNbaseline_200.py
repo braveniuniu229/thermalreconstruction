@@ -16,11 +16,11 @@ wandb.init(
         'arch':'voronoiCNNBaseline',
         'interval':5,       #进行eval的间隔轮数
         'weightdecay':1e-4,
-        'dataset':'typeNum_1',
+        'dataset':'typeNum_10000',
         'epochs':300,
         'tag':'baseline',
         'lr_decay_epoch':100,
-        'batch_size':8,
+        'batch_size':16,
         'dropout':False
     }
 )
@@ -40,7 +40,7 @@ criterion = nn.L1Loss()  # 假设使用均方误差损失
 # 记录文件和检查点路径
 if not os.path.exists(f'checkpoint/{file}'):
     os.makedirs(f'checkpoint/{file}')
-checkpoint_save_path = os.path.join('./checkpoint', file)
+checkpoint_save_path = os.path.join('../checkpoint', file)
 if not os.path.exists(f'trainingResult/{file}'):
     os.makedirs(f'trainingResult/{file}')
 

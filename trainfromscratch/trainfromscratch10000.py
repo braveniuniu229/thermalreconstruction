@@ -1,39 +1,43 @@
 import torch
 import torch.nn as nn
+from model.incontextunet import mainUNet
+from trainfromscratch.dataset.dataset_10000 import dataset_train,dataset_test
+import os
 import tqdm
 from torch.utils.data import DataLoader
 import time
-import os
-from dataset.vordataset import dataset_train,dataset_test
-from model.voronoiCNNoriginal import VoronoiCNN
 import csv
 import wandb
 import utils.argsbasic
 wandb.init(
-    project='voronoi_CNN',
+    project='incontext_unet',
     config={
-        'lr':0.001,
-        'arch':'voronoiCNNBaseline',
+        'normal_lr':0.001,
+        'low_lr':1e-5,
+        'arch':'sratchincontextunet',
         'interval':5,       #进行eval的间隔轮数
         'weightdecay':1e-4,
         'dataset':'typeNum_50',
+        'based_mask_ratio':0.7,
         'epochs':300,
-        'tag':'baseline',
+        'tag':'finetune_with_diff_lr',
         'lr_decay_epoch':100,
         'batch_size':8,
         'dropout':False
     }
 )
-model = VoronoiCNN()
-args = wandb.config
-train_loader = DataLoader(dataset_train,batch_size=args.batch_size,shuffle=True)
+#定义训练的模型
+model = mainUNet(sample_num=1)
+# args = wandb.config
+train_loader = DataLoader(dataset_train,batch_size=8,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
 
-file = args.arch +'_'+args.dataset
-"""这里每次都要修改成训练的model"""
-  #这里修改成训练的断点
+file = 'sratch' +'_'+'num10000'
 
-optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+# 创建一个参数组的列表，为 incontext_encoder 设置低学习率，为其他参数设置标准学习率
+
+
+optimizer = torch.optim.Adam(model.parameters(),lr=0.001)
 scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.98)
 criterion = nn.L1Loss()  # 假设使用均方误差损失
 
@@ -84,11 +88,11 @@ def train(epoch):
 
     total_loss = 0  # 用于累积每个 epoch 的总损失
     pbar = tqdm.tqdm(total=len(train_loader), desc=f"Training Epoch {epoch}", leave=True,colour='white')
-    for iteration, (data,labels) in enumerate(train_loader):
-        data,labels = data,labels
-        data,labels = data.to(device).to(torch.float32),labels.to(device).to(torch.float32)
+    for iteration, (com,labels,samples) in enumerate(train_loader):
+        com,labels,samples = com,labels,samples
+        com,labels,samples = com.to(device).to(torch.float32),labels.to(device).to(torch.float32),samples.to(device).to(torch.float32)
         optimizer.zero_grad()
-        outputs = model(data)
+        outputs = model(com,samples)
         outputs = outputs.squeeze(1)
         loss = criterion(outputs,labels)
         loss.backward()
@@ -107,7 +111,7 @@ def train(epoch):
     average_loss = total_loss / len(train_loader)  # 计算平均损失
     epoch_time = time.time() - start_time
     write_to_csv(f'trainingResult/{file}/train_log.csv', epoch, average_loss)
-    wandb.log({"average_loss_train":average_loss,'epoch_usedtime':epoch_time })
+    # wandb.log({"average_loss_train":average_loss,'epoch_usedtime':epoch_time })
     scheduler.step()
     # githubllllkk
     """这里要修改模型的路径"""
@@ -117,10 +121,10 @@ def validate(epoch, best_loss):
     total_loss = 0
     with torch.no_grad():
         pbar = tqdm.tqdm(total=len(test_loader), desc=f"Training Epoch {epoch}", leave=True, colour='white')
-        for iteration, (data, labels) in enumerate(test_loader):
-            data, labels = data, labels
-            data, labels = data.to(device).to(torch.float32), labels.to(device).to(torch.float32)
-            outputs = model(data)
+        for iteration, (com, labels, samples) in enumerate(test_loader):
+            com, labels, samples = com, labels, samples
+            com, labels, samples = com.to(device).to(torch.float32), labels.to(device).to(torch.float32), samples.to(device).to(torch.float32)
+            outputs = model(com,samples)
             outputs = outputs.squeeze(1)
             loss = criterion(outputs, labels)
             total_loss += loss.item()
@@ -128,7 +132,7 @@ def validate(epoch, best_loss):
     pbar.close()
     avg_loss = total_loss / len(test_loader)
     write_to_csv(f'trainingResult/{file}/val_log.csv', epoch, avg_loss)
-    wandb.log({"average_loss_val": avg_loss})
+    # wandb.log({"average_loss_val": avg_loss})
     # 如果是最好的损失，保存为 best checkpoint
     if avg_loss < best_loss:
         best_loss = avg_loss
@@ -137,7 +141,7 @@ def validate(epoch, best_loss):
     return best_loss
 
 best_loss = float('inf')
-num_epochs = args.epochs # 假设训练 1500 个 epochs
+num_epochs = 300# 假设训练 1500 个 epochs
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)

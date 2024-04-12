@@ -1,19 +1,17 @@
 import torch
-import torch.nn as nn
-from model.unetseries import UNet
-from utils.visualization import plot_error,plot_pres
 import os
 from torch.utils.data import DataLoader
 from dataset.vordataset import dataset_test
+from model.voronoiCNNoriginal import VoronoiCNN
+from utils.visualization import plot_error,plot_pres
  #加载模型
-test_loader = DataLoader(dataset_test,batch_size=5)
-ckpt = torch.load('../checkpoint/voronoiUnetBaseline_typeNum_10000/checkpoint_best.pth')
+test_loader = DataLoader(dataset_test,batch_size=2)
+ckpt = torch.load('./checkpoint/voronoi_CNN_typeNum_10000/checkpoint_best.pth')
 model_dict = ckpt['model_state_dict']
-model = UNet(in_channels=2,out_channels=1)
+model = VoronoiCNN()
 model.load_state_dict(model_dict)
 device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
-criterion = nn.L1Loss()
-type_num = 'ood_2000'
+type_num = 'ood30'
 exp = os.path.join('figure',type_num)
 if not os.path.exists(exp):
     os.makedirs(exp)
@@ -28,14 +26,13 @@ def eval(model):
             outputs = outputs.squeeze(1)
             outputs = outputs.cpu().numpy()
             labels = labels.cpu().numpy()
-            error = abs(labels-outputs)
+            error = abs(outputs-labels)
 
             for i in range(2):
                 err_pth = os.path.join(exp, f'err{i}.png')
                 pre_pth = os.path.join(exp, f'pre{i}.png')
                 plot_pres(outputs[i], pre_pth)
                 plot_error(error[i], err_pth)
-
 
             break
 

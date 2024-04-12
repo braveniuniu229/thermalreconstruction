@@ -15,7 +15,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 def getParser():
     parser = argparse.ArgumentParser(description='heatData')
     parser.add_argument('--type_num', default=1000, type=int)
-    parser.add_argument('--sourcerandom', default=False,type=bool)
+    parser.add_argument('--source_num', default=4,type=int)
     parser.add_argument('--data_num_per_type', default=10, type=int)
     parser.add_argument('--obs_num', default=16, type=int)
     return parser
@@ -73,7 +73,7 @@ def makesquaredata(type_num,source_num,nodes,groups,n,phi,order,A,data_num_per_t
 
         for j in range(data_num_per_type):
             # 设置c为传导率
-            c = np.random.uniform(1000, 6000, source_num)
+            c = np.random.uniform(10000, 20000, source_num)
             # c_ood = np.random.uniform(10000, 60000, source_num)
             source.append([a,b,c])
             yr = PDE(source_num,a,b,c,nodes[:,0], nodes[:,1])
@@ -180,7 +180,7 @@ def main():
     parser = getParser()
     args = parser.parse_args()
     type_num = args.type_num  # 布局数量
-    source_num = 4 if not args.sourcerandom else np.random.randint(3, 7)  # 热源数量
+    source_num = args.source_num  # 热源数量
     data_num_per_type = args.data_num_per_type #统一布局下的样本数量
     obs_num = args.obs_num #测点数量
     observation_idx = np.linspace(0, 4095, obs_num, endpoint=True)

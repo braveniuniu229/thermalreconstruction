@@ -9,31 +9,31 @@ from model.voronoiCNNoriginal import VoronoiCNN
 import csv
 import wandb
 import utils.argsbasic
-wandb.init(
-    project='voronoi_CNN',
-    config={
-        'lr':0.001,
-        'arch':'voronoiCNNBaseline',
-        'interval':5,       #进行eval的间隔轮数
-        'weightdecay':1e-4,
-        'dataset':'typeNum_200',
-        'epochs':300,
-        'tag':'baseline',
-        'lr_decay_epoch':100,
-        'batch_size':8,
-        'dropout':False
-    }
-)
+# wandb.init(
+#     project='voronoi_CNN',
+#     config={
+#         'lr':0.001,
+#         'arch':'voronoiCNNBaseline',
+#         'interval':5,       #进行eval的间隔轮数
+#         'weightdecay':1e-4,
+#         'dataset':'typeNum_10000',
+#         'epochs':300,
+#         'tag':'baseline',
+#         'lr_decay_epoch':100,
+#         'batch_size':8,
+#         'dropout':False
+#     }
+# )
 model = VoronoiCNN()
-args = wandb.config
-train_loader = DataLoader(dataset_train,batch_size=args.batch_size,shuffle=True)
+#
+train_loader = DataLoader(dataset_train,batch_size=32,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
 
-file = args.arch +'_'+args.dataset
+file = 'voronoi_CNN' +'_'+'typeNum_10000'
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
 
-optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.98)
 criterion = nn.L1Loss()  # 假设使用均方误差损失
 
@@ -107,7 +107,7 @@ def train(epoch):
     average_loss = total_loss / len(train_loader)  # 计算平均损失
     epoch_time = time.time() - start_time
     write_to_csv(f'trainingResult/{file}/train_log.csv', epoch, average_loss)
-    wandb.log({"average_loss_train":average_loss,'epoch_usedtime':epoch_time })
+    # wandb.log({"average_loss_train":average_loss,'epoch_usedtime':epoch_time })
     scheduler.step()
     # githubllllkk
     """这里要修改模型的路径"""
@@ -128,7 +128,7 @@ def validate(epoch, best_loss):
     pbar.close()
     avg_loss = total_loss / len(test_loader)
     write_to_csv(f'trainingResult/{file}/val_log.csv', epoch, avg_loss)
-    wandb.log({"average_loss_val": avg_loss})
+    # wandb.log({"average_loss_val": avg_loss})
     # 如果是最好的损失，保存为 best checkpoint
     if avg_loss < best_loss:
         best_loss = avg_loss
@@ -137,7 +137,7 @@ def validate(epoch, best_loss):
     return best_loss
 
 best_loss = float('inf')
-num_epochs = args.epochs # 假设训练 1500 个 epochs
+num_epochs = 300# 假设训练 1500 个 epochs
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
@@ -149,5 +149,5 @@ if __name__ == "__main__":
     start_epoch, best_loss = load_checkpoint(checkpoint_path, model, optimizer)
     for epoch in tqdm.trange(start_epoch, num_epochs):
         train(epoch)
-        if epoch%args.interval==0:
+        if epoch%5==0:
             best_loss = validate(epoch, best_loss)

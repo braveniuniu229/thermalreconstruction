@@ -32,22 +32,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cmocean
 
-def plot3x1beta(input, pres, fields, file_name):
-    fig, axis = plt.subplots(3, 1, figsize=(5, 8), dpi=300)
+def plot3x1beta(pres, labels,  file_name):
+    fig, axis = plt.subplots(3, 1, figsize=(5, 8), dpi=600)
     plt.subplots_adjust(wspace=0.1, hspace=0.1)
 
     # 对于每个子图添加色标，但不设置标签
-    im_input = axis[0].imshow(input, vmin=-2, vmax=2, cmap=cmocean.cm.balance)
+    im_input = axis[0].imshow(pres, vmin=-2, vmax=2, cmap=cmocean.cm.balance)
     axis[0].axis('off')
     fig.colorbar(im_input, ax=axis[0], fraction=0.046, pad=0.04)
 
-    im_fields = axis[1].imshow(pres, vmin=-2, vmax=2, cmap=cmocean.cm.balance)
+    im_fields = axis[1].imshow(labels, vmin=-2, vmax=2, cmap=cmocean.cm.balance)
     axis[1].axis('off')
     fig.colorbar(im_fields, ax=axis[1], fraction=0.046, pad=0.04)
 
-    error = fields - pres
+    error = abs(labels - pres)
     max_error = np.percentile(np.abs(error), 99)
-    im_error = axis[2].imshow(error, vmin=-max_error, vmax=max_error, cmap=cmocean.cm.balance)
+    im_error = axis[2].imshow(error, vmin=0, vmax=0.3, cmap='YlOrRd')
     axis[2].axis('off')
     fig.colorbar(im_error, ax=axis[2], fraction=0.046, pad=0.04)
 
@@ -98,6 +98,53 @@ def plot_single(fields,pres, file_name):
     plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
     # 关闭画布以释放内存
     plt.close()
+def plot_pres(pres, file_name):
+    fig, ax = plt.subplots(figsize=(5, 5), dpi=600)  # 将画布设置为正方形或者根据需要调整
+    # 显示图像
+    im = ax.imshow(pres, vmin=-2, vmax=2, cmap=cmocean.cm.balance)
+    ax.axis('off')  # 关闭轴标签和刻度线
+
+    # 添加色标
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
+    # 紧凑布局
+    plt.tight_layout()
+    # 保存图像
+    plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
+    # 关闭画布以释放内存
+    plt.close()
+def plot_truth(truth, file_name):
+    fig, ax = plt.subplots(figsize=(5, 5), dpi=600)  # 将画布设置为正方形或者根据需要调整
+    # 显示图像
+    im = ax.imshow(truth, vmin=-2, vmax=2, cmap=cmocean.cm.balance)
+    ax.axis('off')  # 关闭轴标签和刻度线
+
+    # 添加色标
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
+    # 紧凑布局
+    plt.tight_layout()
+    # 保存图像
+    plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
+    # 关闭画布以释放内存
+    plt.close()
+
+def plot_error(error, file_name):
+    fig, ax = plt.subplots(figsize=(5, 5), dpi=600)  # 将画布设置为正方形或者根据需要调整
+    # 显示图像
+    im = ax.imshow(error, vmin=0, vmax=0.3, cmap='YlOrRd')
+    ax.axis('off')  # 关闭轴标签和刻度线
+
+    # 添加色标
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
+    # 紧凑布局
+    plt.tight_layout()
+    # 保存图像
+    plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
+    # 关闭画布以释放内存
+    plt.close()
+
 
 # 你需要替换 input_data 和 'output_file_path.png' 为你的数据和文件名
 # plot_single(input_data, 'output_file_path.png')
