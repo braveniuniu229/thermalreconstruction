@@ -153,5 +153,5 @@ if __name__ == "__main__":
     start_epoch, best_loss = load_checkpoint(checkpoint_path, model, optimizer)
     for epoch in tqdm.trange(start_epoch, num_epochs):
         train(epoch)
-        if epoch%args.interval==0:
+        if epoch%5==0:
             best_loss = validate(epoch, best_loss)

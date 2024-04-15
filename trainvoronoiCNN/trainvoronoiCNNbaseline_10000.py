@@ -26,10 +26,10 @@ import utils.argsbasic
 # )
 model = VoronoiCNN()
 #
-train_loader = DataLoader(dataset_train,batch_size=32,shuffle=True)
+train_loader = DataLoader(dataset_train,batch_size=8,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
 
-file = 'voronoi_CNN' +'_'+'typeNum_10000'
+file = 'voronoi_CNN' +'_'+'typeNum_10000'+'batchsize_8'
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
 
