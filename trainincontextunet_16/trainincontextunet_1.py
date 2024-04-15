@@ -9,45 +9,48 @@ import time
 import csv
 import wandb
 import utils.argsbasic
-wandb.init(
-    project='incontext_unet',
-    config={
-        'normal_lr':0.001,
-        'low_lr':1e-5,
-        'arch':'incontextunet',
-        'interval':5,       #进行eval的间隔轮数
-        'weightdecay':1e-4,
-        'dataset':'typeNum_1',
-        'based_mask_ratio':0.7,
-        'epochs':300,
-        'tag':'finetune_with_diff_lr',
-        'lr_decay_epoch':100,
-        'batch_size':8,
-        'sample_num':2,
-
-    }
-)
+# wandb.init(
+#     project='incontext_unet',
+#     config={
+#         'normal_lr':0.001,
+#         'low_lr':1e-5,
+#         'arch':'incontextunet',
+#         'interval':5,       #进行eval的间隔轮数
+#         'weightdecay':1e-4,
+#         'dataset':'typeNum_1',
+#         'based_mask_ratio':0.7,
+#         'epochs':300,
+#         'tag':'finetune_with_diff_lr',
+#         'lr_decay_epoch':100,
+#         'batch_size':8,
+#         'sample_num':2,
+#
+#     }
+# )
 #定义训练的模型
 args = wandb.config
-model = mainUNet(sample_num=args.sample_num)
-train_loader = DataLoader(dataset_train,batch_size=args.batch_size,shuffle=True)
+model = mainUNet(sample_num=1)
+train_loader = DataLoader(dataset_train,batch_size=8,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
 
-file = args.arch +'_'+args.dataset+'_ratio'+str(args.based_mask_ratio)+'_sample_num_'+str(args.sample_num)
+file = 'new' +'_'+'num10000'+'_ratio'+str(0.7)+'_sample_num_'+str(1)
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
 pretrainedunet_ckpt = torch.load('../checkpoint/maskedunet_typeNum_1maskratio_0.7/checkpoint_best.pth')
 pretrainedunet_dict = pretrainedunet_ckpt['model_state_dict']
-for name,param in pretrainedunet_dict.items():
-    if name in model.samplesEncoder.state_dict():
-        # 我们使用 getattr 来获得对应的新模型的属性（层）的引用
-        # 然后将预训练的参数复制到这些属性（层）中
-        setattr(model.samplesEncoder, name, param)
+# 获取当前模型的samplesEncoder部分的状态字典
+model_dict = model.samplesEncoder.state_dict()
+# 筛选出预训练字典中可以加载到当前模型中的参数
+pretrained_dict = {k: v for k, v in pretrainedunet_dict.items() if k in model_dict}
+# 更新当前模型的状态字典
+model_dict.update(pretrained_dict)
+# 将更新后的状态字典加载回模型
+model.samplesEncoder.load_state_dict(model_dict)
 # 创建一个参数组的列表，为 incontext_encoder 设置低学习率，为其他参数设置标准学习率
 low_lr_layers = [param for name, param in model.samplesEncoder.named_parameters()]
 other_parameters = [param for name, param in model.named_parameters() if not name.startswith('samplesEncoder.')]
-low_lr = args.low_lr
-normal_lr = args.normal_lr
+low_lr = 1e-5
+normal_lr = 1e-3
 # 创建优化器参数组
 optimizer_parameters = [
     {'params': low_lr_layers, 'lr': low_lr},
@@ -61,7 +64,7 @@ criterion = nn.L1Loss()  # 假设使用均方误差损失
 # 记录文件和检查点路径
 if not os.path.exists(f'checkpoint/{file}'):
     os.makedirs(f'checkpoint/{file}')
-checkpoint_save_path = os.path.join('../checkpoint', file)
+checkpoint_save_path = os.path.join('./checkpoint', file)
 if not os.path.exists(f'trainingResult/{file}'):
     os.makedirs(f'trainingResult/{file}')
 
@@ -128,7 +131,7 @@ def train(epoch):
     average_loss = total_loss / len(train_loader)  # 计算平均损失
     epoch_time = time.time() - start_time
     write_to_csv(f'trainingResult/{file}/train_log.csv', epoch, average_loss)
-    wandb.log({"average_loss_train":average_loss,'epoch_usedtime':epoch_time })
+    # wandb.log({"average_loss_train":average_loss,'epoch_usedtime':epoch_time })
     scheduler.step()
     # githubllllkk
     """这里要修改模型的路径"""
@@ -149,7 +152,7 @@ def validate(epoch, best_loss):
     pbar.close()
     avg_loss = total_loss / len(test_loader)
     write_to_csv(f'trainingResult/{file}/val_log.csv', epoch, avg_loss)
-    wandb.log({"average_loss_val": avg_loss})
+    # wandb.log({"average_loss_val": avg_loss})
     # 如果是最好的损失，保存为 best checkpoint
     if avg_loss < best_loss:
         best_loss = avg_loss
@@ -158,7 +161,7 @@ def validate(epoch, best_loss):
     return best_loss
 
 best_loss = float('inf')
-num_epochs = args.epochs # 假设训练 1500 个 epochs
+num_epochs = 300# 假设训练 1500 个 epochs
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
@@ -170,5 +173,5 @@ if __name__ == "__main__":
     start_epoch, best_loss = load_checkpoint(checkpoint_path, model, optimizer)
     for epoch in tqdm.trange(start_epoch, num_epochs):
         train(epoch)
-        if epoch%args.interval==0:
+        if epoch%5==0:
             best_loss = validate(epoch, best_loss)

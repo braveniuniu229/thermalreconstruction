@@ -33,11 +33,16 @@ train_loader = DataLoader(dataset_train,batch_size=8,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
 
 file = 'sratch' +'_'+'num10000'
+low_lr_layers = [param for name, param in model.samplesEncoder.named_parameters()]
+other_parameters = [param for name, param in model.named_parameters() if not name.startswith('samplesEncoder.')]
 
 # 创建一个参数组的列表，为 incontext_encoder 设置低学习率，为其他参数设置标准学习率
+optimizer_parameters = [
+    {'params': low_lr_layers, 'lr': 1e-5},
+    {'params': other_parameters, 'lr': 1e-3}
+]
 
-
-optimizer = torch.optim.Adam(model.parameters(),lr=0.001)
+optimizer = torch.optim.Adam(optimizer_parameters)
 scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.98)
 criterion = nn.L1Loss()  # 假设使用均方误差损失
 
