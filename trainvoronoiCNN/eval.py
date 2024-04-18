@@ -8,7 +8,7 @@ import tqdm
 import torch.nn as nn
  #加载模型
 test_loader = DataLoader(dataset_test,batch_size=2)
-ckpt = torch.load('./checkpoint/voronoi_CNN_typeNum_10000/checkpoint_best.pth')
+ckpt = torch.load('./checkpoint/voronoi_CNN_typeNum_10000batchsize_8/checkpoint_best.pth')
 model_dict = ckpt['model_state_dict']
 criterion = nn.L1Loss()
 model = VoronoiCNN()
@@ -23,18 +23,24 @@ def eval(model):
     model.eval()
     with torch.no_grad():
         total_loss = 0
+        Max_loss = 0
         pbar = tqdm.tqdm(total=len(test_loader),leave=True,colour='white')
         for iteration, (data,labels) in enumerate(test_loader):
+            batch,_,_ = labels.shape
             data, labels = data, labels
             data, labels = data.to(device).to(torch.float32), labels.to(device).to(torch.float32)
             outputs = model(data)
             outputs = outputs.squeeze(1)
             loss = criterion(outputs,labels)
+            max_loss = torch.sum(torch.max(torch.abs(outputs - labels).flatten(1), dim=1)[0]).item()/batch
+            Max_loss+= max_loss
             total_loss += loss.item()
             pbar.update(1)
         pbar.close()
         average_loss = total_loss / len(test_loader)
+        average_loss_max = Max_loss/len(test_loader)
         print(average_loss)
+        print(average_loss_max)
 
 
 

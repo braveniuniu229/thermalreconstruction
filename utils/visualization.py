@@ -132,7 +132,7 @@ def plot_truth(truth, file_name):
 def plot_error(error, file_name):
     fig, ax = plt.subplots(figsize=(5, 5), dpi=600)  # 将画布设置为正方形或者根据需要调整
     # 显示图像
-    im = ax.imshow(error, vmin=0, vmax=0.3, cmap='YlOrRd')
+    im = ax.imshow(error, vmin=0, vmax=0.3, cmap='jet')
     ax.axis('off')  # 关闭轴标签和刻度线
 
     # 添加色标

@@ -6,12 +6,12 @@ from model.voronoiCNNoriginal import VoronoiCNN
 from utils.visualization import plot_error,plot_pres
  #加载模型
 test_loader = DataLoader(dataset_test,batch_size=2)
-ckpt = torch.load('./checkpoint/voronoi_CNN_typeNum_10000/checkpoint_best.pth')
+ckpt = torch.load('./checkpoint/voronoi_CNN_typeNum_10000batchsize_8/checkpoint_best.pth')
 model_dict = ckpt['model_state_dict']
 model = VoronoiCNN()
 model.load_state_dict(model_dict)
 device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
-type_num = 'ood30'
+type_num = '10000'
 exp = os.path.join('figure',type_num)
 if not os.path.exists(exp):
     os.makedirs(exp)
