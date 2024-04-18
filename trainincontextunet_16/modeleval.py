@@ -13,7 +13,7 @@ model = mainUNet(sample_num=1)
 model.load_state_dict(model_dict)
 device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
 criterion = nn.L1Loss()
-type_num = 'ood30'
+type_num = 'num10000'
 exp = os.path.join('figure',type_num)
 if not os.path.exists(exp):
     os.makedirs(exp)

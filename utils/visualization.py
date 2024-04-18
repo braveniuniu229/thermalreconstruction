@@ -88,9 +88,18 @@ def plot_single(fields,pres, file_name):
     # 显示图像
     im = ax.imshow(error, vmin=-max_error, vmax=max_error, cmap=cmocean.cm.balance)
     ax.axis('off')  # 关闭轴标签和刻度线
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
 
+    # 设置色标上的刻度
+    cbar.set_ticks([-max_error, -max_error / 2, 0, max_error / 2, max_error])
+
+    # 设置刻度标签的字体大小
+    cbar.ax.tick_params(labelsize=15, width=2)  # 你可以根据需要调整labelsize的值
+    cbar.ax.yaxis.set_tick_params(labelcolor='black', labelsize=16, width=3, direction='in', color='black')
+    for l in cbar.ax.yaxis.get_ticklabels():
+        l.set_weight('bold')
     # 添加色标
-    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
 
     # 紧凑布局
     plt.tight_layout()
@@ -131,8 +140,8 @@ def plot_truth(truth, file_name):
 
 def plot_error(error, file_name):
     fig, ax = plt.subplots(figsize=(5, 5), dpi=600)  # 将画布设置为正方形或者根据需要调整
-    # 显示图像
-    im = ax.imshow(error, vmin=0, vmax=0.3, cmap='jet')
+    max_error = np.percentile(np.abs(error), 95)
+    im = ax.imshow(error, vmin=0, vmax=max_error, cmap='jet')
     ax.axis('off')  # 关闭轴标签和刻度线
 
     # 添加色标

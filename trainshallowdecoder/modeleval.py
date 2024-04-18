@@ -3,15 +3,15 @@ import os
 from torch.utils.data import DataLoader
 from dataset.shallowdecoder.dataset_type_50 import dataset_test
 from model.shallowdecodermlp import shallow_decoder
-from utils.visualization import plot_error,plot_pres
+from utils.visualization import plot_error,plot_pres,plot_single
  #加载模型
 test_loader = DataLoader(dataset_test,batch_size=2)
-ckpt = torch.load('../checkpoint/shallowdecoderBaseline_shallowdecodermlp_typeNum_5005/checkpoint_best.pth')
+ckpt = torch.load('../checkpoint/shallowdecoderBaseline_shallowdecodermlp_typeNum_100005/checkpoint_best.pth')
 model_dict = ckpt['model_state_dict']
 model = shallow_decoder(n_sensors=16,outputlayer_size=4096)
 model.load_state_dict(model_dict)
 device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
-type_num = 'num_50'
+type_num = 'num_10000'
 exp = os.path.join('figure',type_num)
 if not os.path.exists(exp):
     os.makedirs(exp)
@@ -32,7 +32,7 @@ def eval(model):
                 err_pth = os.path.join(exp, f'err{i}.png')
                 pre_pth = os.path.join(exp, f'pre{i}.png')
                 plot_pres(outputs[i], pre_pth)
-                plot_error(error[i], err_pth)
+                plot_single(outputs[i],labels[i], err_pth)
 
             break
 
