@@ -6,7 +6,7 @@ import tqdm
 import torch.nn as nn
  #加载模型
 test_loader = DataLoader(dataset_test,batch_size=2)
-ckpt = torch.load('../checkpoint/shallowdecoderBaseline2_typeNum_15/checkpoint_best.pth')
+ckpt = torch.load('../checkpoint/shallowdecoderBaseline_shallowdecodermlp_typeNum_100005/checkpoint_best.pth')
 model_dict = ckpt['model_state_dict']
 model = shallow_decoder(n_sensors=16,outputlayer_size=4096)
 model.load_state_dict(model_dict)

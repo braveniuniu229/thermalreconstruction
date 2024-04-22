@@ -9,7 +9,7 @@ import tqdm
 
 # 加载模型
 test_loader = DataLoader(dataset_test, batch_size=5)
-ckpt = torch.load('../checkpoint/incontextunet_typeNum_1_ratio0.7finetune_with_diff_lr/checkpoint_best.pth')
+ckpt = torch.load('../checkpoint/incontextunet_typeNum_10000basedratio0.7finetune_with_diff_lr/checkpoint_best.pth')
 model_dict = ckpt['model_state_dict']
 model = mainUNet(sample_num=1)
 model.load_state_dict(model_dict)

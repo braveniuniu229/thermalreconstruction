@@ -6,7 +6,7 @@ from dataset.vordataset import dataset_test
 import tqdm
  #加载模型
 test_loader = DataLoader(dataset_test,batch_size=5)
-ckpt = torch.load('../checkpoint/voronoiUnetBaseline_typeNum_1/checkpoint_best.pth')
+ckpt = torch.load('../checkpoint/voronoiUnetBaseline_typeNum_10000/checkpoint_best.pth')
 model_dict = ckpt['model_state_dict']
 model = UNet(in_channels=2,out_channels=1)
 model.load_state_dict(model_dict)

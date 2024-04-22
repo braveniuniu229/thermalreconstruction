@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from model.unetseries import UNet
-from utils.visualization import plot_error,plot_pres
+from utils.visualization import plot_error,plot_truth,plot_error2
 import os
 from torch.utils.data import DataLoader
 from dataset.vordataset import dataset_test
@@ -13,7 +13,7 @@ model = UNet(in_channels=2,out_channels=1)
 model.load_state_dict(model_dict)
 device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
 criterion = nn.L1Loss()
-type_num = 'num10000'
+type_num = 'ood1t'
 exp = os.path.join('figure',type_num)
 if not os.path.exists(exp):
     os.makedirs(exp)
@@ -30,11 +30,13 @@ def eval(model):
             labels = labels.cpu().numpy()
             error = abs(labels-outputs)
 
-            for i in range(2):
+            for i in range(5):
                 err_pth = os.path.join(exp, f'err{i}.png')
                 pre_pth = os.path.join(exp, f'pre{i}.png')
-                plot_pres(outputs[i], pre_pth)
-                plot_error(error[i], err_pth)
+                tru_pth = os.path.join(exp, f'tru{i}.png')
+                plot_truth(outputs[i], pre_pth)
+                plot_truth(labels[i], tru_pth)
+                plot_error2(error[i], err_pth)
 
 
             break

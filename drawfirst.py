@@ -6,6 +6,8 @@ import numpy as np
 data1 = pd.read_csv('./trainingResult/voronoiUnetBaseline_typeNum_10000/train_log.csv', header=None, names=['Epoch', 'Loss'])
 data2 = pd.read_csv('./trainingResult/voronoiUnetBaseline_typeNum_1/train_log.csv', header=None, names=['Epoch', 'Loss'])
 
+
+
 # 绘图
 plt.figure(figsize=(10, 5))
 
@@ -18,24 +20,28 @@ plt.yscale('log')
 
 # 设置y轴和x轴的范围
 plt.ylim(1e-5, 1e-1)
-plt.xlim(0, 300)
+plt.xlim(0, 300)  # 现在结束于299
+
+# 增大刻度字体大小
+plt.tick_params(axis='both', which='major', labelsize=14)
 
 # 移动图例位置到中间上方，并放大图例
-plt.legend(loc='upper center',  ncol=2, fontsize='large')
+plt.legend(loc='upper center', ncol=1, fontsize='large')
 
 # 在x=299处画一条垂直线，并标注每条线的值
 plt.axvline(x=299, color='red', linestyle='--', linewidth=1, zorder=1)
-for dataset, color in zip([data1, data2], ['blue', 'orange']):
-    y_value = dataset.loc[dataset['Epoch'] == 299, 'Loss'].values[0]
-    plt.text(299, y_value, f'{y_value:.1e}', color=color, va='center', ha='right', fontsize=10, zorder=4)
 
-# 添加标题和轴标签
-plt.title('Training Loss of the DNNs')
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
+
+# 调整x轴和y轴标签的大小
+plt.xlabel('Epoch', fontsize=16)
+plt.ylabel('Loss', fontsize=16)
+
+# 添加标题
+plt.title('Training Loss of the DNNs', fontsize=18)
 
 # 显示网格
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 
 # 显示图表
 plt.show()
+

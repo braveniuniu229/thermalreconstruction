@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from dataset.shallowdecoder.dataset_type_50 import dataset_test
 from model.shallowdecodermlp import shallow_decoder
 from model.gappypod import GappyPodWeight
-from utils.visualization import plot_single,plot_locations
+from utils.visualization import plot_error,plot_locations
 import numpy as np
 path = '../data/Heat_Types50_source4_number2000fixed_normalized.npz'
 origin_data = np.load(path)
@@ -53,13 +53,14 @@ def eval(model):
             outputs = outputs.squeeze(1)
             outputs = outputs.cpu().numpy()
             labels = labels.cpu().numpy()
+            errors = abs(outputs-labels)
 
             for i in range(5):
                 current_file_name = os.path.join(exp, f"image_{i}.png")
-                current_file_name2 = os.path.join(exp, f"sensors_location.png")
-                plot_single(labels[i],outputs[i],current_file_name)
+                current_file_name2 = os.path.join(exp, f"sensors_location{i}.png")
+                plot_error(errors[i],current_file_name)
                 plot_locations(positions,labels[i],current_file_name2)
-                break
+
             break
 
 

@@ -5,7 +5,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sbs
-
+from matplotlib.ticker import MaxNLocator
 
 sbs.set_style('whitegrid')
 
@@ -110,7 +110,7 @@ def plot_single(fields,pres, file_name):
 def plot_pres(pres, file_name):
     fig, ax = plt.subplots(figsize=(5, 5), dpi=600)  # 将画布设置为正方形或者根据需要调整
     # 显示图像
-    im = ax.imshow(pres, vmin=-2, vmax=2, cmap=cmocean.cm.balance)
+    im = ax.imshow(pres, vmin=-2, vmax=2, cmap='bwr')
     ax.axis('off')  # 关闭轴标签和刻度线
 
     # 添加色标
@@ -122,14 +122,49 @@ def plot_pres(pres, file_name):
     plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
     # 关闭画布以释放内存
     plt.close()
+
+
+import numpy as np
+
+from matplotlib.colors import PowerNorm
+
+
+def plot_pres2(pres, file_name):
+    fig, ax = plt.subplots(figsize=(5, 5), dpi=600)
+    # 创建归一化对象，并且在创建时就传入vmin和vmax
+    norm = PowerNorm(gamma=0.5, vmin=-2, vmax=2)
+    im = ax.imshow(pres, cmap='bwr', norm=norm)
+    ax.axis('off')
+
+    # 添加色标
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
+    # 紧凑布局
+    plt.tight_layout()
+    # 保存图像
+    plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
+    # 关闭画布以释放内存
+    plt.close()
+
+
+# 这个函数可以被调用，并传入pres数组和文件名
 def plot_truth(truth, file_name):
-    fig, ax = plt.subplots(figsize=(5, 5), dpi=600)  # 将画布设置为正方形或者根据需要调整
-    # 显示图像
-    im = ax.imshow(truth, vmin=-2, vmax=2, cmap=cmocean.cm.balance)
-    ax.axis('off')  # 关闭轴标签和刻度线
+    """
+       绘制测点位置
+       :param positions: (n, 2) 包含n个测点的位置
+       :param fields: 物理场
+       :return:
+       """
+    h, w = truth.shape
+    x_coor, y_coor = np.linspace(0, w - 1, w), np.linspace(h - 1, 0, h)
+    x_coor, y_coor = np.meshgrid(x_coor, y_coor)
+    x_coor, y_coor = x_coor / 64, y_coor / 64
 
-    # 添加色标
-    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    # plt.contourf(x_coor, y_coor, fields, levels=100, cmap='jet')
+    plt.figure(figsize=(5, 5),dpi=600)
+    plt.axis('off')
+    plt.pcolormesh(x_coor, y_coor, truth, cmap='bwr')
+    # plt.contourf(x_coor, y_coor, fields, levels=100, cmap=cmocean.cm.balance)
 
     # 紧凑布局
     plt.tight_layout()
@@ -138,14 +173,52 @@ def plot_truth(truth, file_name):
     # 关闭画布以释放内存
     plt.close()
 
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+def truncate_colormap(cmap_name, minval=0.0, maxval=0.5, n=100):
+    cmap = plt.get_cmap(cmap_name)
+    new_colors = cmap(np.linspace(minval, maxval, n))
+    new_colors = new_colors[::-1]  # 翻转颜色数组
+    return LinearSegmentedColormap.from_list('trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval), new_colors)
 def plot_error(error, file_name):
-    fig, ax = plt.subplots(figsize=(5, 5), dpi=600)  # 将画布设置为正方形或者根据需要调整
-    max_error = np.percentile(np.abs(error), 95)
-    im = ax.imshow(error, vmin=0, vmax=max_error, cmap='jet')
-    ax.axis('off')  # 关闭轴标签和刻度线
+    fig, ax = plt.subplots(figsize=(5, 5), dpi=600)
+
+    # 设置vmax为色标刻度中的最大值
+    vmax = 0.20
+    new_cmap = truncate_colormap(cmocean.cm.balance, 0.0, 0.5)
+    im = ax.imshow(error, vmin=0, vmax=vmax, cmap=new_cmap)
+    ax.axis('off')
 
     # 添加色标
-    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
+    # 手动设置色标的刻度
+    cbar.set_ticks([0, 0.05, 0.10, 0.15, 0.20])
+    cbar.ax.tick_params(labelsize=14)  # 增大刻度标签字体大小
+
+    # 紧凑布局
+    plt.tight_layout()
+    # 保存图像
+    plt.savefig(file_name, bbox_inches='tight', pad_inches=0)
+    # 关闭画布以释放内存
+    plt.close()
+def plot_error2(error, file_name):
+    fig, ax = plt.subplots(figsize=(5, 5), dpi=600)
+
+    # 设置vmax为色标刻度中的最大值
+    vmax = 0.20
+
+    im = ax.imshow(error, vmin=0, vmax=vmax, cmap='jet')
+    ax.axis('off')
+
+    # 添加色标
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
+    # 手动设置色标的刻度
+    cbar.set_ticks([0, 0.03, 0.06, 0.09, 0.12])
+    cbar.ax.tick_params(labelsize=14)  # 增大刻度标签字体大小
 
     # 紧凑布局
     plt.tight_layout()
@@ -155,9 +228,7 @@ def plot_error(error, file_name):
     plt.close()
 
 
-# 你需要替换 input_data 和 'output_file_path.png' 为你的数据和文件名
-# plot_single(input_data, 'output_file_path.png')
-
+# 使用这个函数，传入误差数组和文件名即可生成图像。
 def plot3x1_coor(input,fields, pres, file_name, x_coor, y_coor):
 
     size = fields.shape

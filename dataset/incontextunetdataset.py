@@ -56,7 +56,7 @@ class thermalDataset_vor(Dataset):
         samples_index = np.random.choice(indices_except_target,self.exp_num,replace=False)
         samples = self.labels[class_idx,samples_index] #exp_num,64,64
         return combined_data,true_label,samples
-dataorigin = np.load('../data/Heat_Types10000_source4_number10fixed_normalized.npz')
+dataorigin = np.load('../data/Heat_Types2000_source4_number15fixed_normalized.npz')
 labels = dataorigin['T']
 
 
