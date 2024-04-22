@@ -34,10 +34,10 @@ plt.axvline(x=299, color='red', linestyle='--', linewidth=1, zorder=1)
 
 # 调整x轴和y轴标签的大小
 plt.xlabel('Epoch', fontsize=16)
-plt.ylabel('Loss', fontsize=16)
+plt.ylabel('Error', fontsize=16)
 
 # 添加标题
-plt.title('Training Loss of the DNNs', fontsize=18)
+plt.title(' Test error of DNN-based TFR methods', fontsize=18)
 
 # 显示网格
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
