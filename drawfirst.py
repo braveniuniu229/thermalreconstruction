@@ -12,8 +12,8 @@ data2 = pd.read_csv('./trainingResult/voronoiUnetBaseline_typeNum_1/train_log.cs
 plt.figure(figsize=(10, 5))
 
 # 绘制每个数据集的loss曲线
-plt.plot(data1['Epoch'], data1['Loss'], label='Num of layouts 1', zorder=3)
-plt.plot(data2['Epoch'], data2['Loss'], label='Num of layouts 10000', zorder=2)
+plt.plot(data1['Epoch'], data1['Loss'], label='Num of layouts 10000', zorder=3)
+plt.plot(data2['Epoch'], data2['Loss'], label='Num of layouts 1', zorder=2)
 
 # 设置对数刻度
 plt.yscale('log')
