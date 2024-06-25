@@ -12,7 +12,7 @@ import utils.argsbasic
 wandb.init(
     project='incontext_unet',
     config={
-        'normal_lr':0.001,
+        'normal_lr': 1e-3,
         'low_lr':1e-5,
         'arch':'incontextunet',
         'interval':5,       #进行eval的间隔轮数
@@ -35,13 +35,17 @@ test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
 file = args.arch +'_'+args.dataset+'basedratio'+str(args.based_mask_ratio)+args.tag
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
-pretrainedunet_ckpt = torch.load('./checkpoint/maskedunet_typeNum_500_0.7/checkpoint_best.pth')
+pretrainedunet_ckpt = torch.load('../checkpoint/maskedunet_typeNum_500maskratio_0.7/checkpoint_best.pth')
 pretrainedunet_dict = pretrainedunet_ckpt['model_state_dict']
-for name,param in pretrainedunet_dict.items():
-    if name in model.samplesEncoder.state_dict():
-        # 我们使用 getattr 来获得对应的新模型的属性（层）的引用
-        # 然后将预训练的参数复制到这些属性（层）中
-        setattr(model.samplesEncoder, name, param)
+model_dict = model.state_dict()
+load_dict={}
+for k,v in pretrainedunet_dict.items():
+    new_k = 'samplesEncoder.'+k
+    if new_k in model_dict:
+        load_dict[new_k] = v
+model_dict.update(load_dict)
+model.load_state_dict(model_dict)
+
 # 创建一个参数组的列表，为 incontext_encoder 设置低学习率，为其他参数设置标准学习率
 low_lr_layers = [param for name, param in model.samplesEncoder.named_parameters()]
 other_parameters = [param for name, param in model.named_parameters() if not name.startswith('samplesEncoder.')]
@@ -58,9 +62,9 @@ scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.98)
 criterion = nn.L1Loss()  # 假设使用均方误差损失
 
 # 记录文件和检查点路径
-if not os.path.exists(f'checkpoint/{file}'):
-    os.makedirs(f'checkpoint/{file}')
-checkpoint_save_path = os.path.join('../checkpoint', file)
+if not os.path.exists(f'./checkpoint/{file}'):
+    os.makedirs(f'./checkpoint/{file}')
+checkpoint_save_path = os.path.join('./checkpoint', file)
 if not os.path.exists(f'trainingResult/{file}'):
     os.makedirs(f'trainingResult/{file}')
 

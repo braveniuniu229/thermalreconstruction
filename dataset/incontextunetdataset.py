@@ -42,7 +42,7 @@ class thermalDataset_vor(Dataset):
         true_label = self.labels[class_idx, sample_idx_in_class]
         #进行划分的测点值
         values = true_label[self.points[:, 0], self.points[:, 1]]
-        # 最后进行这个插值划分的网格
+        # 最后进行这个插值划分的网格m
         grid_x, grid_y = np.meshgrid(np.linspace(0, 63, 64), np.linspace(0, 63, 64))
         voronoidata = griddata(self.points, values, (grid_x, grid_y), method='nearest')
         mask = np.zeros_like(true_label, dtype=np.float32)
@@ -50,6 +50,7 @@ class thermalDataset_vor(Dataset):
         # 新建一个轴用于拼接
         voronoidata_exp = np.expand_dims(voronoidata, axis=0)
         mask_exp = np.expand_dims(mask, axis=0)
+
         # 将拓展后的mask和插值后的温度场拼接在一起
         combined_data = np.concatenate([voronoidata_exp, mask_exp], axis=0)
         indices_except_target = np.setdiff1d(self.indices, [sample_idx_in_class])

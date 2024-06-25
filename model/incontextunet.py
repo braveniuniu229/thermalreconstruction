@@ -84,16 +84,13 @@ if __name__=="__main__":
     sample = torch.randn(10,1,64,64)
     incontextmodel = mainUNet(sample_num=1)
     model_dict = incontextmodel.state_dict()
-    sampleencoder_dict = incontextmodel.samplesEncoder.state_dict()
+
     unet = UNet(in_channels=1,out_channels=1)
     unet_dict = unet.state_dict()
-    # for name,para in model_dict.items():
-    #     print(name)
-    # for name,_ in sampleencoder_dict.items():
-    #     print(name)
-    # for name,_ in unet_dict.items():
-    #     print(name)
+    for k,_ in model_dict.items():
+        print(k)
+    print("............")
+    for k,_ in unet.items():
+        print(k)
 
     # print(incontextmodel.samplesEncoder.state_dict())
-    out =incontextmodel(x,sample)
-    print(out.shape)
