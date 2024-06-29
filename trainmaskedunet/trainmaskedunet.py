@@ -41,7 +41,7 @@ criterion = nn.L1Loss()  # 假设使用均方误差损失
 # 记录文件和检查点路径
 if not os.path.exists(f'checkpoint/{file}'):
     os.makedirs(f'checkpoint/{file}')
-checkpoint_save_path = os.path.join('../checkpoint', file)
+checkpoint_save_path = os.path.join('./checkpoint', file)
 if not os.path.exists(f'trainingResult/{file}'):
     os.makedirs(f'trainingResult/{file}')
 

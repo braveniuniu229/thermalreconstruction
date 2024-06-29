@@ -16,8 +16,8 @@ wandb.init(
         'arch':'maskedunet',
         'interval':5,       #进行eval的间隔轮数
         'weightdecay':1e-4,
-        'dataset':'typeNum_200',
-        'mask_ratio':0.7,
+        'dataset':'typeNum_500',
+        'mask_ratio':0.5,
         'epochs':300,
         'tag':'baseline',
         'lr_decay_epoch':100,

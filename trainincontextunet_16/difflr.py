@@ -38,7 +38,7 @@ dataset_test = thermalDataset_vor(labels, exp_num=1,train=False, mask=args.mask,
 train_loader = DataLoader(dataset_train,batch_size=args.batch_size,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
 
-file = args.arch +'_'+args.dataset+'500'+"samelr"+"nomask"
+file = args.arch +'_'+args.dataset+'500'+"difflr"+"nomask"
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
 """这里每次都要修改成训练的model"""
@@ -54,13 +54,16 @@ for k,v in pretrainedunet_dict.items():
 model_dict.update(load_dict)
 model.load_state_dict(model_dict)
 
+loaded_params = [param for name, param in model.named_parameters() if 'samplesEncoder.' in name]
+other_params = [param for name, param in model.named_parameters() if 'samplesEncoder.' not in name]
+
+# 创建优化器参数组
+optimizer = torch.optim.Adam([
+    {'params': loaded_params, 'lr': args.low_lr},
+    {'params': other_params, 'lr': args.normal_lr}
+])
 # 创建一个参数组的列表，为 incontext_encoder 设置低学习率，为其他参数设置标准学习率
 
-normal_lr = args.normal_lr
-# 创建优化器参数组
-
-
-optimizer = torch.optim.Adam(model.parameters(),normal_lr)
 scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.98)
 criterion = nn.L1Loss()  # 假设使用均方误差损失
 

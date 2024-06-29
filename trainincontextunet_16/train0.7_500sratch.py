@@ -1,13 +1,14 @@
 import torch
 import torch.nn as nn
 from model.incontextunet import mainUNet
-from dataset.incontextunetdataset import dataset_train,dataset_test
+from dataset.incontextunetdataset import thermalDataset_vor
 import os
 import tqdm
 from torch.utils.data import DataLoader
 import time
 import csv
 import wandb
+import numpy as np
 import utils.argsbasic
 wandb.init(
     project='incontext_unet',
@@ -23,23 +24,28 @@ wandb.init(
         'tag':'finetune_with_diff_lr',
         'lr_decay_epoch':100,
         'batch_size':8,
-        'dropout':False
+        'dropout':False,
+        'mask':True
     }
 )
 #定义训练的模型
 model = mainUNet(sample_num=1)
 args = wandb.config
+dataorigin = np.load('../data/Heat_Types500_source4_number200fixed_normalized.npz')
+labels = dataorigin['T']
+dataset_train = thermalDataset_vor(labels, exp_num=1,train=True, mask=args.mask,train_ratio=0.8)
+dataset_test = thermalDataset_vor(labels, exp_num=1,train=False, mask=args.mask,train_ratio=0.8)
 train_loader = DataLoader(dataset_train,batch_size=args.batch_size,shuffle=True)
 test_loader = DataLoader(dataset_test,batch_size=64,shuffle=False)
 
-file = args.arch +'_'+args.dataset+'scratch'
+file = args.arch +'_'+args.dataset+'scratch'+"withmask"
 """这里每次都要修改成训练的model"""
   #这里修改成训练的断点
 
 
 
 
-optimizer = torch.optim.Adam(model.parameters())
+optimizer = torch.optim.Adam(model.parameters(),lr=args.normal_lr)
 scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.98)
 criterion = nn.L1Loss()  # 假设使用均方误差损失
 

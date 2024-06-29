@@ -16,8 +16,8 @@ wandb.init(
         'arch':'maskedunet',
         'interval':5,       #进行eval的间隔轮数
         'weightdecay':1e-4,
-        'dataset':'typeNum_1',
-        'mask_ratio':0.7,
+        'dataset':'typeNum_10000',
+        'mask_ratio':0.6,
         'epochs':300,
         'tag':'baseline',
         'lr_decay_epoch':100,
@@ -152,5 +152,5 @@ if __name__ == "__main__":
     start_epoch, best_loss = load_checkpoint(checkpoint_path, model, optimizer)
     for epoch in tqdm.trange(start_epoch, num_epochs):
         train(epoch)
-        if epoch%args.interval==0:
+        if epoch%args.interval==100:
             best_loss = validate(epoch, best_loss)

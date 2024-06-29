@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch
 
 class MaskedDataset(Dataset):
-    def __init__(self, labels,mask_ratio=0.85, train=True, train_ratio=0.99):
+    def __init__(self, labels,mask_ratio=0.6, train=True, train_ratio=0.99):
         """
         Custom dataset initializer.
         :param data: The data (e.g., 'T' from your dataset)
@@ -55,7 +55,7 @@ class MaskedDataset(Dataset):
         sample_label_ = torch.from_numpy(sample_label).clone()  # Clone the data to avoid modifying the original label
         masked_label = self.add_random_mask(sample_label_)
         return masked_label, sample_label
-dataorigin = np.load('./data/Heat_Types10000_source4_number10fixed_normalized.npz')
+dataorigin = np.load('../data/Heat_Types10000_source4_number10fixed_normalized.npz')
 labels = dataorigin['T']
 
 dataset_train = MaskedDataset(labels, train=True, train_ratio=0.8)
