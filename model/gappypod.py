@@ -7,16 +7,15 @@ import numpy as np
 from sklearn.decomposition import PCA
 
 
+
 class GappyPod():
-    def __init__(self, data, map_size=(64, 64), n_components=50):
-        self.data = data  #（100,384,199）
+
+    def __init__(self, data, map_size=(64, 64), n_components=50,positions = np.array([[8,8],[23,8],[39,8],[55,8],[8,23],[23,23],[39,23],[55,23],[8,39],[23 ,39],[39 ,39],[55,39],[8,55],[23,55],[39,55],[55,55]])):
+        self.data = data
+
         self.pca = PCA(n_components=n_components)
         self.pca.fit(self.data.reshape(data.shape[0], -1))
-        x = np.linspace(8, 55, 4, dtype=int)
-        y = np.linspace(8, 55, 4, dtype=int)
-        xv, yv = np.meshgrid(x, y)
-        points = np.vstack([xv.ravel(), yv.ravel()]).T
-        self.positions = points
+        self.positions = positions
         self.map_size = map_size
 
         components = self.pca.components_
@@ -30,8 +29,7 @@ class GappyPod():
             component_mask.append(component[:, self.positions[i, 0], :][:, self.positions[i, 1]].reshape(-1, 1))
             mean_mask.append(mean[:, self.positions[i, 0], :][:, self.positions[i, 1]].reshape(-1, 1))
 
-        self.component_mask = torch.from_numpy(np.concatenate(component_mask, axis=-1)).float().cuda().unsqueeze(
-            0)
+        self.component_mask = torch.from_numpy(np.concatenate(component_mask, axis=-1)).float().cuda().unsqueeze(0)
         self.mean_mask = torch.from_numpy(np.concatenate(mean_mask, axis=-1).T).float().cuda()
         self.components_ = torch.from_numpy(components).float().cuda()
         self.mean_ = torch.from_numpy(means).reshape(1, -1).float().cuda()
@@ -50,16 +48,12 @@ class GappyPod():
 
 
 class GappyPodWeight():
-    def __init__(self, data, map_size=(64,64), n_components=50,
-                  observe_weight=50):
+    def __init__(self, data, map_size=(64,64), n_components=50,positions = np.array([[8,8],[23,8],[39,8],[55,8],[8,23],[23,23],[39,23],[55,23],[8,39],[23 ,39],[39 ,39],[55,39],[8,55],[23,55],[39,55],[55,55]])
+,observe_weight=50):
         self.data = data
         self.pca = PCA(n_components=n_components)
         self.pca.fit(self.data.reshape(data.shape[0], -1))
-        x = np.linspace(8, 55, 4, dtype=int)
-        y = np.linspace(8, 55, 4, dtype=int)
-        xv, yv = np.meshgrid(x, y)
-        points = np.vstack([xv.ravel(), yv.ravel()]).T
-        self.positions_observe = points
+        self.positions_observe = positions
         self.positions_pre = np.array([[i, j] for i in range(map_size[0]) for j in range(map_size[1])])
         self.map_size = map_size
         self.observe_weight = observe_weight

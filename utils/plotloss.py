@@ -3,11 +3,11 @@ import pandas as pd
 import numpy as np
 
 # 读取数据
-df1 = pd.read_csv('../trainingResult/maskedunet_typeNum_100000.7/train_log.csv', header=None)
-df2 = pd.read_csv('../trainingResult/maskedunet_typeNum_100000.8/train_log.csv', header=None)
-df3 = pd.read_csv('../trainingResult/maskedunet_typeNum_100000.85/train_log.csv', header=None)
-df4 = pd.read_csv('../trainingResult/maskedunet_typeNum_10000_0.9/train_log.csv', header=None)
-df5 = pd.read_csv('../trainingResult/maskedunet_typeNum_10000_0.99/train_log.csv', header=None)
+df1 = pd.read_csv('../trainingResult/voronoiUnetBaseline_typeNum_1/train_log.csv', header=None)
+df2 = pd.read_csv('../trainingResult/voronoiUnetBaseline_typeNum_50/train_log.csv', header=None)
+df3 = pd.read_csv('../trainingResult/voronoiUnetBaseline_typeNum_200/train_log.csv', header=None)
+df4 = pd.read_csv('../trainingResult/voronoiUnetBaseline_typeNum_500/train_log.csv', header=None)
+df5 = pd.read_csv('../trainingResult/voronoiUnetBaseline_typeNum_10000/train_log.csv', header=None)
 
 # 绘图
 plt.figure(figsize=(10, 5))
@@ -15,7 +15,7 @@ marker_indices = range(0, len(df1)-1, 50)
 markers = ['o', 's', '^', 'd', '*']  # 散点的形状列表
 colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']  # 颜色列表
 dataframes = [df1, df2, df3, df4, df5]  # 数据列表
-labels = ['mask ratio 0.7', 'mask ratio 0.8', 'mask ratio 0.85', 'mask ratio 0.9', 'mask ratio 0.99']
+labels = ['1', '50', '200', '500', '10000']
 
 for df, color, marker, label in zip(dataframes, colors, markers, labels):
     plt.plot(df[0], df[1], label=label, color=color)
@@ -33,13 +33,13 @@ plt.xlim(left=0)
 
 # 设置y轴为对数刻度
 plt.yscale('log')
-plt.ylim(5e-4, 1e-1)
+plt.ylim(1e-5, 1e-1)
 
 # 设置标签和标题
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
-plt.title('Training Loss Over Different mask ratio')
-plt.legend()
+plt.title('Training Loss of the DNNs')
+plt.legend(title='Number of total layouts', loc='center', fontsize='large', title_fontsize='large', bbox_to_anchor=(0.85, 0.8), fancybox=True, shadow=True)
 plt.grid(True)
 
 # 展示图表
