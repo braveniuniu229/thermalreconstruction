@@ -9,7 +9,7 @@ from sklearn.decomposition import PCA
 
 class GappyPod():
     def __init__(self, data, map_size=(64, 64), n_components=50):
-        self.data = data
+        self.data = data  #（100,384,199）
         self.pca = PCA(n_components=n_components)
         self.pca.fit(self.data.reshape(data.shape[0], -1))
         x = np.linspace(8, 55, 4, dtype=int)

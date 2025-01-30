@@ -64,4 +64,14 @@ if __name__ =="__main__":
     for i,(com,labels) in enumerate(train_loader):
         print(com.shape)
         print(labels.shape)
+        import matplotlib.pyplot as plt
+
+        fig, axis = plt.subplots(1, 1, figsize=(5, 5), dpi=200)  # Smaller figsize
+        plt.subplots_adjust(wspace=0.1, hspace=0.1)  # Reduce the space between images
+
+        voronoi = com[0,0]
+        axis.imshow(voronoi, vmin=-2, vmax=2, cmap='bwr')
+        axis.axis('off')
+        plt.show()
+        break
 
